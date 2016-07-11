@@ -1,0 +1,9 @@
+* elm-snake notes
+** set up init dir
+** create 1-piece snake
+** move 1-piece snake
+
+
+* nice to have
+** multiple snakes
+** random starting point
