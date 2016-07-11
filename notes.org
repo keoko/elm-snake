@@ -1,12 +1,15 @@
 * elm-snake notes
-** TODO set up init dir
+** DONE set up init dir
+CLOSED: [2016-07-11 Mon 19:37]
 ** TODO create 1-piece snake
 ** TODO move 1-piece snake
 ** TODO install elm 0.17.1
+** TODO keyboard control
 
 
 * nice to have
 ** multiple snakes
+** mouse control
 ** random starting point
 
 
