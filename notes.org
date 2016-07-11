@@ -1,9 +1,14 @@
 * elm-snake notes
-** set up init dir
-** create 1-piece snake
-** move 1-piece snake
+** TODO set up init dir
+** TODO create 1-piece snake
+** TODO move 1-piece snake
+** TODO install elm 0.17.1
 
 
 * nice to have
 ** multiple snakes
 ** random starting point
+
+
+* docs
+** elm-format emacs
