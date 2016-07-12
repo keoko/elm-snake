@@ -1,17 +1,33 @@
 * elm-snake notes
 ** DONE set up init dir
 CLOSED: [2016-07-11 Mon 19:37]
-** TODO create 1-piece snake
+** DONE create 1-piece snake
+CLOSED: [2016-07-11 Mon 19:48]
 ** TODO move 1-piece snake
-** TODO install elm 0.17.1
+** DONE install elm 0.17.1
+CLOSED: [2016-07-11 Mon 20:19]
 ** TODO keyboard control
+** TODO other game links
+** TODO log to the console
+** TODO CSS positioning
+
+
 
 
 * nice to have
+** control board boundaries
+** best way to draw the snake (SVG, CSS, chars, others)?
 ** multiple snakes
 ** mouse control
 ** random starting point
+** elm-format emacs
 
 
 * docs
-** elm-format emacs
+https://en.wikipedia.org/wiki/Snake_(video_game)
+http://elm-by-example.org/chapter13snake.html
+https://github.com/remyferre/snake-elm
+https://github.com/joelchelliah/snake_in_elm
+https://github.com/theburningmonk/elm-snake
+https://ohanhi.github.io/base-for-game-elm-017.html
+
