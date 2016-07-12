@@ -3,16 +3,19 @@
 CLOSED: [2016-07-11 Mon 19:37]
 ** DONE create 1-piece snake
 CLOSED: [2016-07-11 Mon 19:48]
-** TODO move 1-piece snake
+** DONE move 1-piece snake
+CLOSED: [2016-07-12 Tue 08:39]
 ** DONE install elm 0.17.1
 CLOSED: [2016-07-11 Mon 20:19]
-** TODO keyboard control
-** TODO other game links
+** DONE keyboard control
+CLOSED: [2016-07-12 Tue 08:38]
+** TODO moveUp
+** TODO moveDown
+** TODO other game links (asteroids, bomberman)
 ** TODO log to the console
-** TODO CSS positioning
-
-
-
+** DONE CSS positioning
+CLOSED: [2016-07-12 Tue 08:40]
+** TODO Key model is necessary
 
 * nice to have
 ** control board boundaries

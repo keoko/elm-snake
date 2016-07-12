@@ -71,22 +71,13 @@ subscriptions model =
         , Keyboard.downs KeyDown
         ]
 
+moveUp : Model -> Model
+moveUp model =
+    { model | top = model.top - 10 }
 
-arrowLeft : Int
-arrowLeft = 37
-
-arrowRight : Int
-arrowRight = 39
-
-keyUp : KeyCode -> Model -> Model
-keyUp keyCode model =
-    case keyCode of
-        37 ->
-            moveLeft model
-        39 ->
-            moveRight model
-        _ ->
-            model
+moveDown : Model -> Model
+moveDown model =
+    { model | top = model.top + 10 }
 
 moveLeft : Model -> Model
 moveLeft model =
@@ -96,6 +87,19 @@ moveRight : Model -> Model
 moveRight model =
     { model | left = model.left + 10 }
 
+keyUp : KeyCode -> Model -> Model
+keyUp keyCode model =
+    case keyCode of
+        38 ->
+            moveUp model
+        40 ->
+            moveDown model
+        37 ->
+            moveLeft model
+        39 ->
+            moveRight model
+        _ ->
+            model
 
 keyDown : KeyCode -> Model -> Model
 keyDown keyCode model =

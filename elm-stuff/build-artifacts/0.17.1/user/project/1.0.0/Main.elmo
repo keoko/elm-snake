@@ -12,10 +12,24 @@ var _user$project$Main$moveLeft = function (model) {
 		model,
 		{left: model.left - 10});
 };
+var _user$project$Main$moveDown = function (model) {
+	return _elm_lang$core$Native_Utils.update(
+		model,
+		{top: model.top + 10});
+};
+var _user$project$Main$moveUp = function (model) {
+	return _elm_lang$core$Native_Utils.update(
+		model,
+		{top: model.top - 10});
+};
 var _user$project$Main$keyUp = F2(
 	function (keyCode, model) {
 		var _p0 = keyCode;
 		switch (_p0) {
+			case 38:
+				return _user$project$Main$moveUp(model);
+			case 40:
+				return _user$project$Main$moveDown(model);
 			case 37:
 				return _user$project$Main$moveLeft(model);
 			case 39:
@@ -24,8 +38,6 @@ var _user$project$Main$keyUp = F2(
 				return model;
 		}
 	});
-var _user$project$Main$arrowRight = 39;
-var _user$project$Main$arrowLeft = 37;
 var _user$project$Main$toPixel = function (x) {
 	return A2(
 		_elm_lang$core$Basics_ops['++'],
