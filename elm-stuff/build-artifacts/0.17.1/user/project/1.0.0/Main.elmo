@@ -1,3 +1,9 @@
+var _user$project$Main$changeDirection = F2(
+	function (model, direction) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{direction: direction});
+	});
 var _user$project$Main$keyDown = F2(
 	function (keyCode, model) {
 		return model;
@@ -22,22 +28,19 @@ var _user$project$Main$moveUp = function (model) {
 		model,
 		{top: model.top - 10});
 };
-var _user$project$Main$keyUp = F2(
-	function (keyCode, model) {
-		var _p0 = keyCode;
-		switch (_p0) {
-			case 38:
-				return _user$project$Main$moveUp(model);
-			case 40:
-				return _user$project$Main$moveDown(model);
-			case 37:
-				return _user$project$Main$moveLeft(model);
-			case 39:
-				return _user$project$Main$moveRight(model);
-			default:
-				return model;
-		}
-	});
+var _user$project$Main$moveSnake = function (model) {
+	var _p0 = model.direction;
+	switch (_p0.ctor) {
+		case 'Up':
+			return _user$project$Main$moveUp(model);
+		case 'Down':
+			return _user$project$Main$moveDown(model);
+		case 'Left':
+			return _user$project$Main$moveLeft(model);
+		default:
+			return _user$project$Main$moveRight(model);
+	}
+};
 var _user$project$Main$toPixel = function (x) {
 	return A2(
 		_elm_lang$core$Basics_ops['++'],
@@ -72,14 +75,58 @@ var _user$project$Main$view = function (model) {
 		_elm_lang$core$Native_List.fromArray(
 			[]));
 };
+var _user$project$Main$Model = F3(
+	function (a, b, c) {
+		return {left: a, top: b, direction: c};
+	});
+var _user$project$Main$KeyDown = function (a) {
+	return {ctor: 'KeyDown', _0: a};
+};
+var _user$project$Main$KeyUp = function (a) {
+	return {ctor: 'KeyUp', _0: a};
+};
+var _user$project$Main$TimeUpdate = function (a) {
+	return {ctor: 'TimeUpdate', _0: a};
+};
+var _user$project$Main$subscriptions = function (model) {
+	return _elm_lang$core$Platform_Sub$batch(
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_elm_lang$keyboard$Keyboard$ups(_user$project$Main$KeyUp),
+				_elm_lang$keyboard$Keyboard$downs(_user$project$Main$KeyDown),
+				_elm_lang$animation_frame$AnimationFrame$diffs(_user$project$Main$TimeUpdate)
+			]));
+};
+var _user$project$Main$Right = {ctor: 'Right'};
+var _user$project$Main$model = {left: 500, top: 0, direction: _user$project$Main$Right};
+var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Main$model, _1: _elm_lang$core$Platform_Cmd$none};
+var _user$project$Main$Left = {ctor: 'Left'};
+var _user$project$Main$Down = {ctor: 'Down'};
+var _user$project$Main$Up = {ctor: 'Up'};
+var _user$project$Main$keyUp = F2(
+	function (keyCode, model) {
+		var _p1 = keyCode;
+		switch (_p1) {
+			case 38:
+				return A2(_user$project$Main$changeDirection, model, _user$project$Main$Up);
+			case 40:
+				return A2(_user$project$Main$changeDirection, model, _user$project$Main$Down);
+			case 37:
+				return A2(_user$project$Main$changeDirection, model, _user$project$Main$Left);
+			case 39:
+				return A2(_user$project$Main$changeDirection, model, _user$project$Main$Right);
+			default:
+				return model;
+		}
+	});
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p1 = msg;
-		switch (_p1.ctor) {
+		var _p2 = msg;
+		switch (_p2.ctor) {
 			case 'KeyUp':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					A2(_user$project$Main$keyUp, _p1._0, model),
+					A2(_user$project$Main$keyUp, _p2._0, model),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			case 'KeyDown':
@@ -91,33 +138,12 @@ var _user$project$Main$update = F2(
 			default:
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					model,
+					_user$project$Main$moveSnake(model),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 		}
 	});
-var _user$project$Main$model = {left: 500, top: 0};
-var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Main$model, _1: _elm_lang$core$Platform_Cmd$none};
-var _user$project$Main$Model = F2(
-	function (a, b) {
-		return {left: a, top: b};
-	});
-var _user$project$Main$KeyDown = function (a) {
-	return {ctor: 'KeyDown', _0: a};
-};
-var _user$project$Main$KeyUp = function (a) {
-	return {ctor: 'KeyUp', _0: a};
-};
-var _user$project$Main$subscriptions = function (model) {
-	return _elm_lang$core$Platform_Sub$batch(
-		_elm_lang$core$Native_List.fromArray(
-			[
-				_elm_lang$keyboard$Keyboard$ups(_user$project$Main$KeyUp),
-				_elm_lang$keyboard$Keyboard$downs(_user$project$Main$KeyDown)
-			]));
-};
 var _user$project$Main$main = {
 	main: _elm_lang$html$Html_App$program(
 		{init: _user$project$Main$init, view: _user$project$Main$view, update: _user$project$Main$update, subscriptions: _user$project$Main$subscriptions})
 };
-var _user$project$Main$None = {ctor: 'None'};

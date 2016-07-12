@@ -4,19 +4,24 @@ import Html.App as App
 import Html exposing (Html, text, div)
 import Html.Attributes exposing (id, style)
 import Keyboard exposing (KeyCode)
+import AnimationFrame
+import Time exposing (Time)
 
 
 type alias Model =
     { left : Int
     , top : Int
+    , direction : Direction
     }
 
 
-type Msg
-    = None
+type Msg = TimeUpdate  Time
       | KeyUp KeyCode
       | KeyDown KeyCode
 
+type Direction = Up | Down | Left | Right
+
+main : Program Never
 main =
     App.program
         { init = init
@@ -25,11 +30,14 @@ main =
         , subscriptions = subscriptions
         }
 
+model : Model
 model =
     { left = 500
     , top = 0
+    , direction = Right
     }
 
+init : (Model, Cmd Msg)
 init =
     (model, Cmd.none)
 
@@ -40,8 +48,8 @@ update msg model =
             (keyUp keycode model) ! []
         KeyDown keyCode ->
             model ! []
-        _ ->
-            model ! []
+        TimeUpdate t ->
+            (moveSnake model) ! []
 
 
 toPixel : Int -> String
@@ -69,6 +77,7 @@ subscriptions model =
     Sub.batch
         [ Keyboard.ups KeyUp
         , Keyboard.downs KeyDown
+        , AnimationFrame.diffs TimeUpdate
         ]
 
 moveUp : Model -> Model
@@ -91,16 +100,33 @@ keyUp : KeyCode -> Model -> Model
 keyUp keyCode model =
     case keyCode of
         38 ->
-            moveUp model
+            changeDirection model Up
         40 ->
-            moveDown model
+            changeDirection model Down
         37 ->
-            moveLeft model
+            changeDirection model Left
         39 ->
-            moveRight model
+            changeDirection model Right
         _ ->
             model
 
 keyDown : KeyCode -> Model -> Model
 keyDown keyCode model =
     model
+
+moveSnake : Model -> Model
+moveSnake model =
+    case model.direction of
+        Up ->
+            moveUp model
+        Down ->
+            moveDown model
+        Left ->
+            moveLeft model
+        Right ->
+            moveRight model
+
+
+changeDirection : Model -> Direction -> Model
+changeDirection model  direction =
+    { model | direction = direction }
