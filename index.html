@@ -8435,6 +8435,10 @@ var _elm_lang$keyboard$Keyboard$subMap = F2(
 			});
 	});
 _elm_lang$core$Native_Platform.effectManagers['Keyboard'] = {pkg: 'elm-lang/keyboard', init: _elm_lang$keyboard$Keyboard$init, onEffects: _elm_lang$keyboard$Keyboard$onEffects, onSelfMsg: _elm_lang$keyboard$Keyboard$onSelfMsg, tag: 'sub', subMap: _elm_lang$keyboard$Keyboard$subMap};
+var _user$project$Main$newPoint = F2(
+	function (x, y) {
+		return {x: x, y: y};
+	});
 var _user$project$Main$changeDirection = F2(
 	function (model, direction) {
 		return _elm_lang$core$Native_Utils.update(
@@ -8446,24 +8450,28 @@ var _user$project$Main$keyDown = F2(
 		return model;
 	});
 var _user$project$Main$moveRight = function (model) {
+	var point$ = A2(_user$project$Main$newPoint, model.head.x + 10, model.head.y);
 	return _elm_lang$core$Native_Utils.update(
 		model,
-		{left: model.left + 10});
+		{head: point$});
 };
 var _user$project$Main$moveLeft = function (model) {
+	var point$ = A2(_user$project$Main$newPoint, model.head.x - 10, model.head.y);
 	return _elm_lang$core$Native_Utils.update(
 		model,
-		{left: model.left - 10});
+		{head: point$});
 };
 var _user$project$Main$moveDown = function (model) {
+	var point$ = A2(_user$project$Main$newPoint, model.head.x, model.head.y - 10);
 	return _elm_lang$core$Native_Utils.update(
 		model,
-		{top: model.top + 10});
+		{head: point$});
 };
 var _user$project$Main$moveUp = function (model) {
+	var point$ = A2(_user$project$Main$newPoint, model.head.x, model.head.y + 10);
 	return _elm_lang$core$Native_Utils.update(
 		model,
-		{top: model.top - 10});
+		{head: point$});
 };
 var _user$project$Main$moveSnake = function (model) {
 	var _p0 = model.direction;
@@ -8478,6 +8486,12 @@ var _user$project$Main$moveSnake = function (model) {
 			return _user$project$Main$moveRight(model);
 	}
 };
+var _user$project$Main$toPixelCoordinates = function (p) {
+	var _p1 = A2(_user$project$Main$newPoint, 200, 50);
+	var x = _p1.x;
+	var y = _p1.y;
+	return {ctor: '_Tuple2', _0: p.x - x, _1: y - p.y};
+};
 var _user$project$Main$toPixel = function (x) {
 	return A2(
 		_elm_lang$core$Basics_ops['++'],
@@ -8485,6 +8499,9 @@ var _user$project$Main$toPixel = function (x) {
 		'px');
 };
 var _user$project$Main$view = function (model) {
+	var _p2 = _user$project$Main$toPixelCoordinates(model.head);
+	var left = _p2._0;
+	var top = _p2._1;
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
@@ -8497,12 +8514,12 @@ var _user$project$Main$view = function (model) {
 						{
 						ctor: '_Tuple2',
 						_0: 'top',
-						_1: _user$project$Main$toPixel(model.top)
+						_1: _user$project$Main$toPixel(top)
 					},
 						{
 						ctor: '_Tuple2',
 						_0: 'left',
-						_1: _user$project$Main$toPixel(model.left)
+						_1: _user$project$Main$toPixel(left)
 					},
 						{ctor: '_Tuple2', _0: 'width', _1: '10px'},
 						{ctor: '_Tuple2', _0: 'height', _1: '10px'},
@@ -8512,9 +8529,13 @@ var _user$project$Main$view = function (model) {
 		_elm_lang$core$Native_List.fromArray(
 			[]));
 };
-var _user$project$Main$Model = F3(
-	function (a, b, c) {
-		return {left: a, top: b, direction: c};
+var _user$project$Main$Model = F2(
+	function (a, b) {
+		return {head: a, direction: b};
+	});
+var _user$project$Main$Point = F2(
+	function (a, b) {
+		return {x: a, y: b};
 	});
 var _user$project$Main$KeyDown = function (a) {
 	return {ctor: 'KeyDown', _0: a};
@@ -8535,15 +8556,18 @@ var _user$project$Main$subscriptions = function (model) {
 			]));
 };
 var _user$project$Main$Right = {ctor: 'Right'};
-var _user$project$Main$model = {left: 500, top: 0, direction: _user$project$Main$Right};
+var _user$project$Main$model = {
+	head: A2(_user$project$Main$newPoint, 500, 0),
+	direction: _user$project$Main$Right
+};
 var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Main$model, _1: _elm_lang$core$Platform_Cmd$none};
 var _user$project$Main$Left = {ctor: 'Left'};
 var _user$project$Main$Down = {ctor: 'Down'};
 var _user$project$Main$Up = {ctor: 'Up'};
 var _user$project$Main$keyUp = F2(
 	function (keyCode, model) {
-		var _p1 = keyCode;
-		switch (_p1) {
+		var _p3 = keyCode;
+		switch (_p3) {
 			case 38:
 				return A2(_user$project$Main$changeDirection, model, _user$project$Main$Up);
 			case 40:
@@ -8558,12 +8582,12 @@ var _user$project$Main$keyUp = F2(
 	});
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p2 = msg;
-		switch (_p2.ctor) {
+		var _p4 = msg;
+		switch (_p4.ctor) {
 			case 'KeyUp':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					A2(_user$project$Main$keyUp, _p2._0, model),
+					A2(_user$project$Main$keyUp, _p4._0, model),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			case 'KeyDown':

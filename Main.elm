@@ -9,8 +9,7 @@ import Time exposing (Time)
 
 
 type alias Model =
-    { left : Int
-    , top : Int
+    { head : Point
     , direction : Direction
     }
 
@@ -20,6 +19,10 @@ type Msg = TimeUpdate  Time
       | KeyDown KeyCode
 
 type Direction = Up | Down | Left | Right
+
+type alias Point = { x : Int
+                   , y : Int
+                   }
 
 main : Program Never
 main =
@@ -32,8 +35,7 @@ main =
 
 model : Model
 model =
-    { left = 500
-    , top = 0
+    { head = newPoint 500 0
     , direction = Right
     }
 
@@ -56,21 +58,31 @@ toPixel : Int -> String
 toPixel x =
     (toString x) ++ "px"
 
+toPixelCoordinates : Point -> (Int, Int)
+toPixelCoordinates p =
+    let
+        {x, y} = newPoint 200 50 
+    in
+        (p.x - x, y - p.y)
+
 
 view : Model -> Html Msg
 view model =
-    div
+    let
+        (left, top) = toPixelCoordinates model.head
+    in
+        div
         [ id "rectangle"
         , style
-            [ ("position", "absolute")
-            , ("top", toPixel model.top)
-            , ("left", toPixel model.left)
-            , ( "width", "10px" )
-            , ( "height", "10px" )
-            , ( "background-color", "blue" )
-            ]
+              [ ("position", "absolute")
+              , ("top", toPixel top)
+              , ("left", toPixel left)
+              , ( "width", "10px" )
+              , ( "height", "10px" )
+              , ( "background-color", "blue" )
+              ]
         ]
-        []
+    []
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -82,19 +94,31 @@ subscriptions model =
 
 moveUp : Model -> Model
 moveUp model =
-    { model | top = model.top - 10 }
+    let
+        point' = newPoint model.head.x (model.head.y + 10)
+    in
+    { model | head = point' }
 
 moveDown : Model -> Model
 moveDown model =
-    { model | top = model.top + 10 }
+    let
+        point' = newPoint model.head.x (model.head.y - 10)
+    in
+    { model | head = point' }
 
 moveLeft : Model -> Model
 moveLeft model =
-    { model | left = model.left - 10 }
+    let
+        point' = newPoint (model.head.x - 10) model.head.y
+    in
+    { model | head = point' }
 
 moveRight : Model -> Model
 moveRight model =
-    { model | left = model.left + 10 }
+    let
+        point' = newPoint (model.head.x + 10) model.head.y
+    in
+    { model | head = point' }
 
 keyUp : KeyCode -> Model -> Model
 keyUp keyCode model =
@@ -130,3 +154,10 @@ moveSnake model =
 changeDirection : Model -> Direction -> Model
 changeDirection model  direction =
     { model | direction = direction }
+
+
+newPoint : Int -> Int -> Point
+newPoint x y =
+    { x = x
+    , y = y
+    }

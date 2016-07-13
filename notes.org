@@ -9,13 +9,21 @@ CLOSED: [2016-07-12 Tue 08:39]
 CLOSED: [2016-07-11 Mon 20:19]
 ** DONE keyboard control
 CLOSED: [2016-07-12 Tue 08:38]
-** TODO moveUp
-** TODO moveDown
-** TODO other game links (asteroids, bomberman)
+** DONE moveUp
+CLOSED: [2016-07-12 Tue 23:47]
+** DONE moveDown
+CLOSED: [2016-07-12 Tue 23:47]
+** DONE direction
+CLOSED: [2016-07-12 Tue 23:48]
+** TODO Point
+** TODO Items
+** DONE other game links (asteroids, bomberman)
+CLOSED: [2016-07-12 Tue 23:54]
 ** TODO log to the console
 ** DONE CSS positioning
 CLOSED: [2016-07-12 Tue 08:40]
-** TODO Key model is necessary
+** TODO Key model is necessary?
+** TODO Start, Game, End pages
 
 * nice to have
 ** control board boundaries
@@ -24,6 +32,8 @@ CLOSED: [2016-07-12 Tue 08:40]
 ** mouse control
 ** random starting point
 ** elm-format emacs
+** mobile
+** mobile native
 
 
 * docs
@@ -34,3 +44,4 @@ https://github.com/joelchelliah/snake_in_elm
 https://github.com/theburningmonk/elm-snake
 https://ohanhi.github.io/base-for-game-elm-017.html
 https://www.gitbook.com/book/sbaechler/elm-hexagon/details
+http://sonnym.github.io/2014/05/05/writing-game-of-life-in-elm/
