@@ -15,7 +15,9 @@ CLOSED: [2016-07-12 Tue 23:47]
 CLOSED: [2016-07-12 Tue 23:47]
 ** DONE direction
 CLOSED: [2016-07-12 Tue 23:48]
-** TODO Point
+** DONE Point
+CLOSED: [2016-07-13 Wed 08:44]
+** TODO Snake Segments
 ** TODO Items
 ** DONE other game links (asteroids, bomberman)
 CLOSED: [2016-07-12 Tue 23:54]
@@ -23,7 +25,10 @@ CLOSED: [2016-07-12 Tue 23:54]
 ** DONE CSS positioning
 CLOSED: [2016-07-12 Tue 08:40]
 ** TODO Key model is necessary?
+No need to know key codes. This could be hidden in the module.
 ** TODO Start, Game, End pages
+** TODO reduce number of parenthesis
+>>, <<, and other functions.
 
 * nice to have
 ** control board boundaries
