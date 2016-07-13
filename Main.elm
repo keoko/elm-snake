@@ -11,6 +11,7 @@ import Time exposing (Time)
 type alias Model =
     { snake : Snake
     , direction : Direction
+    , food : Point
     }
 
 type alias Snake = List Point
@@ -25,6 +26,12 @@ type alias Point = { x : Int
                    , y : Int
                    }
 
+foodColor : String
+foodColor = "red"
+
+snakeColor : String
+snakeColor = "green"
+
 main : Program Never
 main =
     App.program
@@ -37,10 +44,14 @@ main =
 initialPoint : Point
 initialPoint = newPoint 500 0
 
+initialFoodPoint : Point
+initialFoodPoint = newPoint 300 10
+
 model : Model
 model =
     { snake = [initialPoint, (newPoint 501 0), (newPoint 502 0)]
     , direction = Left
+    , food = initialFoodPoint
     }
 
 init : (Model, Cmd Msg)
@@ -70,8 +81,8 @@ toPixelCoordinates p =
         (p.x - x, y - p.y)
 
 
-viewSnakeSegment : (Int, Int) -> Html Msg
-viewSnakeSegment (left, top) =
+viewBlock : (Int, Int) -> String -> Html Msg
+viewBlock (left, top) color =
     div
     [ id "rectangle"
     , style
@@ -80,16 +91,22 @@ viewSnakeSegment (left, top) =
           , ("left", toPixel left)
           , ( "width", "10px" )
           , ( "height", "10px" )
-          , ( "background-color", "blue" )
+          , ( "background-color", color )
           ]
     ] []
+
+viewFood : (Int, Int) -> Html Msg
+viewFood p = viewBlock p foodColor
+
+viewSnakeSegment : (Int, Int) -> Html Msg
+viewSnakeSegment p = viewBlock p snakeColor
 
 view : Model -> Html Msg
 view model =
     let
         snake = List.map (\p -> p |> toPixelCoordinates |> viewSnakeSegment) model.snake
     in
-        div [] snake
+        div [] ((viewFood (toPixelCoordinates initialFoodPoint)) :: snake)
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -142,6 +159,19 @@ moveRight model =
     in
         { model | snake = mutateSnake model.snake point' }
 
+moveSnake : Model -> Model
+moveSnake model =
+    case model.direction of
+        Up ->
+            moveUp model
+        Down ->
+            moveDown model
+        Left ->
+            moveLeft model
+        Right ->
+            moveRight model
+
+
 keyUp : KeyCode -> Model -> Model
 keyUp keyCode model =
     case keyCode of
@@ -159,19 +189,6 @@ keyUp keyCode model =
 keyDown : KeyCode -> Model -> Model
 keyDown keyCode model =
     model
-
-moveSnake : Model -> Model
-moveSnake model =
-    case model.direction of
-        Up ->
-            moveUp model
-        Down ->
-            moveDown model
-        Left ->
-            moveLeft model
-        Right ->
-            moveRight model
-
 
 changeDirection : Model -> Direction -> Model
 changeDirection model  direction =

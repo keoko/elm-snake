@@ -17,7 +17,8 @@ CLOSED: [2016-07-12 Tue 23:47]
 CLOSED: [2016-07-12 Tue 23:48]
 ** DONE Point
 CLOSED: [2016-07-13 Wed 08:44]
-** TODO Snake Segments
+** DONE Snake Segments
+CLOSED: [2016-07-13 Wed 21:47]
 ** TODO Items
 ** DONE other game links (asteroids, bomberman)
 CLOSED: [2016-07-12 Tue 23:54]
@@ -29,6 +30,9 @@ No need to know key codes. This could be hidden in the module.
 ** TODO Start, Game, End pages
 ** TODO reduce number of parenthesis
 >>, <<, and other functions.
+** TODO Maybe
+** TODO HowTo handle errors
+** TODO randomize item position
 
 * nice to have
 ** control board boundaries
@@ -39,6 +43,9 @@ No need to know key codes. This could be hidden in the module.
 ** elm-format emacs
 ** mobile
 ** mobile native
+** scoring
+** handle snake velocity
+** different velocities based on level or snake length
 
 
 * docs

@@ -8469,49 +8469,37 @@ var _user$project$Main$toPixel = function (x) {
 		_elm_lang$core$Basics$toString(x),
 		'px');
 };
-var _user$project$Main$viewSnakeSegment = function (_p1) {
-	var _p2 = _p1;
-	return A2(
-		_elm_lang$html$Html$div,
-		_elm_lang$core$Native_List.fromArray(
-			[
-				_elm_lang$html$Html_Attributes$id('rectangle'),
-				_elm_lang$html$Html_Attributes$style(
-				_elm_lang$core$Native_List.fromArray(
-					[
-						{ctor: '_Tuple2', _0: 'position', _1: 'absolute'},
-						{
-						ctor: '_Tuple2',
-						_0: 'top',
-						_1: _user$project$Main$toPixel(_p2._1)
-					},
-						{
-						ctor: '_Tuple2',
-						_0: 'left',
-						_1: _user$project$Main$toPixel(_p2._0)
-					},
-						{ctor: '_Tuple2', _0: 'width', _1: '10px'},
-						{ctor: '_Tuple2', _0: 'height', _1: '10px'},
-						{ctor: '_Tuple2', _0: 'background-color', _1: 'blue'}
-					]))
-			]),
-		_elm_lang$core$Native_List.fromArray(
-			[]));
-};
-var _user$project$Main$view = function (model) {
-	var snake = A2(
-		_elm_lang$core$List$map,
-		function (p) {
-			return _user$project$Main$viewSnakeSegment(
-				_user$project$Main$toPixelCoordinates(p));
-		},
-		model.snake);
-	return A2(
-		_elm_lang$html$Html$div,
-		_elm_lang$core$Native_List.fromArray(
-			[]),
-		snake);
-};
+var _user$project$Main$viewBlock = F2(
+	function (_p1, color) {
+		var _p2 = _p1;
+		return A2(
+			_elm_lang$html$Html$div,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$id('rectangle'),
+					_elm_lang$html$Html_Attributes$style(
+					_elm_lang$core$Native_List.fromArray(
+						[
+							{ctor: '_Tuple2', _0: 'position', _1: 'absolute'},
+							{
+							ctor: '_Tuple2',
+							_0: 'top',
+							_1: _user$project$Main$toPixel(_p2._1)
+						},
+							{
+							ctor: '_Tuple2',
+							_0: 'left',
+							_1: _user$project$Main$toPixel(_p2._0)
+						},
+							{ctor: '_Tuple2', _0: 'width', _1: '10px'},
+							{ctor: '_Tuple2', _0: 'height', _1: '10px'},
+							{ctor: '_Tuple2', _0: 'background-color', _1: color}
+						]))
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[]));
+	});
+var _user$project$Main$initialFoodPoint = A2(_user$project$Main$newPoint, 300, 10);
 var _user$project$Main$initialPoint = A2(_user$project$Main$newPoint, 500, 0);
 var _user$project$Main$head = function (snake) {
 	return A2(
@@ -8568,9 +8556,35 @@ var _user$project$Main$moveSnake = function (model) {
 			return _user$project$Main$moveRight(model);
 	}
 };
-var _user$project$Main$Model = F2(
-	function (a, b) {
-		return {snake: a, direction: b};
+var _user$project$Main$snakeColor = 'green';
+var _user$project$Main$viewSnakeSegment = function (p) {
+	return A2(_user$project$Main$viewBlock, p, _user$project$Main$snakeColor);
+};
+var _user$project$Main$foodColor = 'red';
+var _user$project$Main$viewFood = function (p) {
+	return A2(_user$project$Main$viewBlock, p, _user$project$Main$foodColor);
+};
+var _user$project$Main$view = function (model) {
+	var snake = A2(
+		_elm_lang$core$List$map,
+		function (p) {
+			return _user$project$Main$viewSnakeSegment(
+				_user$project$Main$toPixelCoordinates(p));
+		},
+		model.snake);
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[]),
+		A2(
+			_elm_lang$core$List_ops['::'],
+			_user$project$Main$viewFood(
+				_user$project$Main$toPixelCoordinates(_user$project$Main$initialFoodPoint)),
+			snake));
+};
+var _user$project$Main$Model = F3(
+	function (a, b, c) {
+		return {snake: a, direction: b, food: c};
 	});
 var _user$project$Main$Point = F2(
 	function (a, b) {
@@ -8603,7 +8617,8 @@ var _user$project$Main$model = {
 			A2(_user$project$Main$newPoint, 501, 0),
 			A2(_user$project$Main$newPoint, 502, 0)
 		]),
-	direction: _user$project$Main$Left
+	direction: _user$project$Main$Left,
+	food: _user$project$Main$initialFoodPoint
 };
 var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Main$model, _1: _elm_lang$core$Platform_Cmd$none};
 var _user$project$Main$Down = {ctor: 'Down'};
