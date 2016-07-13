@@ -9,10 +9,11 @@ import Time exposing (Time)
 
 
 type alias Model =
-    { head : Point
+    { snake : Snake
     , direction : Direction
     }
 
+type alias Snake = List Point
 
 type Msg = TimeUpdate  Time
       | KeyUp KeyCode
@@ -33,10 +34,13 @@ main =
         , subscriptions = subscriptions
         }
 
+initialPoint : Point
+initialPoint = newPoint 500 0
+
 model : Model
 model =
-    { head = newPoint 500 0
-    , direction = Right
+    { snake = [initialPoint, (newPoint 501 0), (newPoint 502 0)]
+    , direction = Left
     }
 
 init : (Model, Cmd Msg)
@@ -66,23 +70,26 @@ toPixelCoordinates p =
         (p.x - x, y - p.y)
 
 
+viewSnakeSegment : (Int, Int) -> Html Msg
+viewSnakeSegment (left, top) =
+    div
+    [ id "rectangle"
+    , style
+          [ ("position", "absolute")
+          , ("top", toPixel top)
+          , ("left", toPixel left)
+          , ( "width", "10px" )
+          , ( "height", "10px" )
+          , ( "background-color", "blue" )
+          ]
+    ] []
+
 view : Model -> Html Msg
 view model =
     let
-        (left, top) = toPixelCoordinates model.head
+        snake = List.map (\p -> p |> toPixelCoordinates |> viewSnakeSegment) model.snake
     in
-        div
-        [ id "rectangle"
-        , style
-              [ ("position", "absolute")
-              , ("top", toPixel top)
-              , ("left", toPixel left)
-              , ( "width", "10px" )
-              , ( "height", "10px" )
-              , ( "background-color", "blue" )
-              ]
-        ]
-    []
+        div [] snake
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -92,33 +99,48 @@ subscriptions model =
         , AnimationFrame.diffs TimeUpdate
         ]
 
+mutateSnake : Snake -> Point -> Snake
+mutateSnake snake point =
+    let
+        l = List.length snake
+    in
+        point :: (List.take (l-1) snake)
+
+head : Snake -> Point
+head snake =
+    Maybe.withDefault initialPoint (List.head snake)
+
 moveUp : Model -> Model
 moveUp model =
     let
-        point' = newPoint model.head.x (model.head.y + 10)
+        h = head model.snake
+        point' = newPoint h.x (h.y + 10)
     in
-    { model | head = point' }
+        { model | snake = mutateSnake model.snake point' }
 
 moveDown : Model -> Model
 moveDown model =
     let
-        point' = newPoint model.head.x (model.head.y - 10)
+        h = head model.snake
+        point' = newPoint h.x (h.y - 10)
     in
-    { model | head = point' }
+        { model | snake = mutateSnake model.snake point' }
 
 moveLeft : Model -> Model
 moveLeft model =
     let
-        point' = newPoint (model.head.x - 10) model.head.y
+        h = head model.snake
+        point' = newPoint (h.x - 10) h.y
     in
-    { model | head = point' }
+        { model | snake = mutateSnake model.snake point' }
 
 moveRight : Model -> Model
 moveRight model =
     let
-        point' = newPoint (model.head.x + 10) model.head.y
+        h = head model.snake
+        point' = newPoint (h.x + 10) h.y
     in
-    { model | head = point' }
+        { model | snake = mutateSnake model.snake point' }
 
 keyUp : KeyCode -> Model -> Model
 keyUp keyCode model =
