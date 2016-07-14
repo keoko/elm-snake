@@ -8449,13 +8449,24 @@ var _user$project$Main$keyDown = F2(
 	function (keyCode, model) {
 		return model;
 	});
-var _user$project$Main$mutateSnake = F2(
-	function (snake, point) {
-		var l = _elm_lang$core$List$length(snake);
-		return A2(
-			_elm_lang$core$List_ops['::'],
-			point,
-			A2(_elm_lang$core$List$take, l - 1, snake));
+var _user$project$Main$moveTail = function (model) {
+	var l = _elm_lang$core$List$length(model.snake);
+	return _elm_lang$core$Native_Utils.update(
+		model,
+		{
+			snake: A2(_elm_lang$core$List$take, l - 1, model.snake)
+		});
+};
+var _user$project$Main$growSnake = function (model) {
+	return model;
+};
+var _user$project$Main$moveHead = F2(
+	function (model, point) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				snake: A2(_elm_lang$core$List_ops['::'], point, model.snake)
+			});
 	});
 var _user$project$Main$toPixelCoordinates = function (p) {
 	var _p0 = A2(_user$project$Main$newPoint, 200, 50);
@@ -8499,7 +8510,17 @@ var _user$project$Main$viewBlock = F2(
 			_elm_lang$core$Native_List.fromArray(
 				[]));
 	});
-var _user$project$Main$initialFoodPoint = A2(_user$project$Main$newPoint, 300, 10);
+var _user$project$Main$initialFoodPoint = A2(_user$project$Main$newPoint, 200, 0);
+var _user$project$Main$nextFood = function (food) {
+	return _user$project$Main$initialFoodPoint;
+};
+var _user$project$Main$eatFood = function (model) {
+	return _elm_lang$core$Native_Utils.update(
+		model,
+		{
+			food: _user$project$Main$nextFood(model.food)
+		});
+};
 var _user$project$Main$initialPoint = A2(_user$project$Main$newPoint, 500, 0);
 var _user$project$Main$head = function (snake) {
 	return A2(
@@ -8507,41 +8528,35 @@ var _user$project$Main$head = function (snake) {
 		_user$project$Main$initialPoint,
 		_elm_lang$core$List$head(snake));
 };
+var _user$project$Main$canEatFood = function (model) {
+	return _elm_lang$core$Native_Utils.eq(
+		_user$project$Main$head(model.snake),
+		model.food);
+};
+var _user$project$Main$checkForFood = function (model) {
+	return _user$project$Main$canEatFood(model) ? _user$project$Main$eatFood(model) : _user$project$Main$moveTail(model);
+};
+var _user$project$Main$maxY = 500;
 var _user$project$Main$moveUp = function (model) {
 	var h = _user$project$Main$head(model.snake);
-	var point$ = A2(_user$project$Main$newPoint, h.x, h.y + 10);
-	return _elm_lang$core$Native_Utils.update(
-		model,
-		{
-			snake: A2(_user$project$Main$mutateSnake, model.snake, point$)
-		});
+	var point$ = (_elm_lang$core$Native_Utils.cmp(h.y + 10, _user$project$Main$maxY) > 0) ? A2(_user$project$Main$newPoint, h.x, 0 - _user$project$Main$maxY) : A2(_user$project$Main$newPoint, h.x, h.y + 10);
+	return A2(_user$project$Main$moveHead, model, point$);
 };
 var _user$project$Main$moveDown = function (model) {
 	var h = _user$project$Main$head(model.snake);
-	var point$ = A2(_user$project$Main$newPoint, h.x, h.y - 10);
-	return _elm_lang$core$Native_Utils.update(
-		model,
-		{
-			snake: A2(_user$project$Main$mutateSnake, model.snake, point$)
-		});
+	var point$ = (_elm_lang$core$Native_Utils.cmp(h.y - 10, 0 - _user$project$Main$maxY) < 0) ? A2(_user$project$Main$newPoint, h.x, _user$project$Main$maxY) : A2(_user$project$Main$newPoint, h.x, h.y - 10);
+	return A2(_user$project$Main$moveHead, model, point$);
 };
+var _user$project$Main$maxX = 1000;
 var _user$project$Main$moveLeft = function (model) {
 	var h = _user$project$Main$head(model.snake);
-	var point$ = A2(_user$project$Main$newPoint, h.x - 10, h.y);
-	return _elm_lang$core$Native_Utils.update(
-		model,
-		{
-			snake: A2(_user$project$Main$mutateSnake, model.snake, point$)
-		});
+	var point$ = (_elm_lang$core$Native_Utils.cmp(h.x - 10, 0 - _user$project$Main$maxX) < 0) ? A2(_user$project$Main$newPoint, _user$project$Main$maxX, h.y) : A2(_user$project$Main$newPoint, h.x - 10, h.y);
+	return A2(_user$project$Main$moveHead, model, point$);
 };
 var _user$project$Main$moveRight = function (model) {
 	var h = _user$project$Main$head(model.snake);
-	var point$ = A2(_user$project$Main$newPoint, h.x + 10, h.y);
-	return _elm_lang$core$Native_Utils.update(
-		model,
-		{
-			snake: A2(_user$project$Main$mutateSnake, model.snake, point$)
-		});
+	var point$ = (_elm_lang$core$Native_Utils.cmp(h.x + 10, _user$project$Main$maxX) > 0) ? A2(_user$project$Main$newPoint, 0 - _user$project$Main$maxX, h.y) : A2(_user$project$Main$newPoint, h.x + 10, h.y);
+	return A2(_user$project$Main$moveHead, model, point$);
 };
 var _user$project$Main$moveSnake = function (model) {
 	var _p3 = model.direction;
@@ -8555,6 +8570,10 @@ var _user$project$Main$moveSnake = function (model) {
 		default:
 			return _user$project$Main$moveRight(model);
 	}
+};
+var _user$project$Main$nextStep = function (model) {
+	return _user$project$Main$checkForFood(
+		_user$project$Main$moveSnake(model));
 };
 var _user$project$Main$snakeColor = 'green';
 var _user$project$Main$viewSnakeSegment = function (p) {
@@ -8658,7 +8677,7 @@ var _user$project$Main$update = F2(
 			default:
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					_user$project$Main$moveSnake(model),
+					_user$project$Main$nextStep(model),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 		}

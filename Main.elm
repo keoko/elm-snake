@@ -32,6 +32,13 @@ foodColor = "red"
 snakeColor : String
 snakeColor = "green"
 
+maxX : Int
+maxX = 1000
+
+maxY : Int
+maxY = 500
+
+
 main : Program Never
 main =
     App.program
@@ -45,7 +52,7 @@ initialPoint : Point
 initialPoint = newPoint 500 0
 
 initialFoodPoint : Point
-initialFoodPoint = newPoint 300 10
+initialFoodPoint = newPoint 200 0
 
 model : Model
 model =
@@ -66,7 +73,7 @@ update msg model =
         KeyDown keyCode ->
             model ! []
         TimeUpdate t ->
-            (moveSnake model) ! []
+            (nextStep model) ! []
 
 
 toPixel : Int -> String
@@ -116,12 +123,10 @@ subscriptions model =
         , AnimationFrame.diffs TimeUpdate
         ]
 
-mutateSnake : Snake -> Point -> Snake
-mutateSnake snake point =
-    let
-        l = List.length snake
-    in
-        point :: (List.take (l-1) snake)
+moveHead : Model -> Point -> Model
+moveHead model point =
+    { model | snake = (point :: model.snake) }
+
 
 head : Snake -> Point
 head snake =
@@ -131,33 +136,46 @@ moveUp : Model -> Model
 moveUp model =
     let
         h = head model.snake
-        point' = newPoint h.x (h.y + 10)
+        point' = if (h.y + 10 > maxY) then
+                     newPoint h.x (0 - maxY)
+                 else
+                     newPoint h.x (h.y + 10)
     in
-        { model | snake = mutateSnake model.snake point' }
+        moveHead model point'
 
 moveDown : Model -> Model
 moveDown model =
     let
         h = head model.snake
-        point' = newPoint h.x (h.y - 10)
+        point' = if (h.y - 10 < (0 - maxY)) then
+                     newPoint h.x maxY
+                 else
+                     newPoint h.x (h.y - 10)
     in
-        { model | snake = mutateSnake model.snake point' }
+        moveHead model point'
 
 moveLeft : Model -> Model
 moveLeft model =
     let
         h = head model.snake
-        point' = newPoint (h.x - 10) h.y
+        point' = if (h.x - 10 < (0 - maxX)) then
+                     newPoint maxX h.y
+                 else
+                     newPoint (h.x - 10) h.y
     in
-        { model | snake = mutateSnake model.snake point' }
+        moveHead model point'
 
 moveRight : Model -> Model
 moveRight model =
     let
         h = head model.snake
-        point' = newPoint (h.x + 10) h.y
+        point' = if (h.x + 10 > maxX) then
+                     newPoint (0 - maxX) h.y
+                 else
+                     newPoint (h.x + 10) h.y
     in
-        { model | snake = mutateSnake model.snake point' }
+        moveHead model point'
+
 
 moveSnake : Model -> Model
 moveSnake model =
@@ -170,6 +188,44 @@ moveSnake model =
             moveLeft model
         Right ->
             moveRight model
+
+nextStep : Model -> Model
+nextStep model =
+    model
+        |> moveSnake
+        |> checkForFood
+
+
+checkForFood : Model -> Model
+checkForFood model =
+    if canEatFood model then
+        eatFood model
+    else
+        moveTail model
+
+eatFood : Model -> Model
+eatFood model =
+    { model | food = nextFood model.food }
+
+nextFood : Point -> Point
+nextFood food =
+    initialFoodPoint
+
+
+canEatFood : Model -> Bool
+canEatFood model =
+    (head model.snake) == model.food
+
+growSnake : Model -> Model
+growSnake model =
+    model
+
+moveTail : Model -> Model
+moveTail model =
+    let
+        l = List.length model.snake
+    in
+        { model | snake = List.take (l-1) model.snake }
 
 
 keyUp : KeyCode -> Model -> Model
