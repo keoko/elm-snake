@@ -8468,12 +8468,6 @@ var _user$project$Main$moveHead = F2(
 				snake: A2(_elm_lang$core$List_ops['::'], point, model.snake)
 			});
 	});
-var _user$project$Main$toPixelCoordinates = function (p) {
-	var _p0 = A2(_user$project$Main$newPoint, 200, 50);
-	var x = _p0.x;
-	var y = _p0.y;
-	return {ctor: '_Tuple2', _0: p.x - x, _1: y - p.y};
-};
 var _user$project$Main$toPixel = function (x) {
 	return A2(
 		_elm_lang$core$Basics_ops['++'],
@@ -8481,8 +8475,8 @@ var _user$project$Main$toPixel = function (x) {
 		'px');
 };
 var _user$project$Main$viewBlock = F2(
-	function (_p1, color) {
-		var _p2 = _p1;
+	function (_p0, color) {
+		var _p1 = _p0;
 		return A2(
 			_elm_lang$html$Html$div,
 			_elm_lang$core$Native_List.fromArray(
@@ -8495,12 +8489,12 @@ var _user$project$Main$viewBlock = F2(
 							{
 							ctor: '_Tuple2',
 							_0: 'top',
-							_1: _user$project$Main$toPixel(_p2._1)
+							_1: _user$project$Main$toPixel(_p1._1)
 						},
 							{
 							ctor: '_Tuple2',
 							_0: 'left',
-							_1: _user$project$Main$toPixel(_p2._0)
+							_1: _user$project$Main$toPixel(_p1._0)
 						},
 							{ctor: '_Tuple2', _0: 'width', _1: '10px'},
 							{ctor: '_Tuple2', _0: 'height', _1: '10px'},
@@ -8536,7 +8530,7 @@ var _user$project$Main$canEatFood = function (model) {
 var _user$project$Main$checkForFood = function (model) {
 	return _user$project$Main$canEatFood(model) ? _user$project$Main$eatFood(model) : _user$project$Main$moveTail(model);
 };
-var _user$project$Main$maxY = 500;
+var _user$project$Main$maxY = 100;
 var _user$project$Main$moveUp = function (model) {
 	var h = _user$project$Main$head(model.snake);
 	var point$ = (_elm_lang$core$Native_Utils.cmp(h.y + 10, _user$project$Main$maxY) > 0) ? A2(_user$project$Main$newPoint, h.x, 0 - _user$project$Main$maxY) : A2(_user$project$Main$newPoint, h.x, h.y + 10);
@@ -8547,7 +8541,13 @@ var _user$project$Main$moveDown = function (model) {
 	var point$ = (_elm_lang$core$Native_Utils.cmp(h.y - 10, 0 - _user$project$Main$maxY) < 0) ? A2(_user$project$Main$newPoint, h.x, _user$project$Main$maxY) : A2(_user$project$Main$newPoint, h.x, h.y - 10);
 	return A2(_user$project$Main$moveHead, model, point$);
 };
-var _user$project$Main$maxX = 1000;
+var _user$project$Main$maxX = 200;
+var _user$project$Main$toPixelCoordinates = function (p) {
+	var _p2 = A2(_user$project$Main$newPoint, _user$project$Main$maxX, _user$project$Main$maxY);
+	var x = _p2.x;
+	var y = _p2.y;
+	return {ctor: '_Tuple2', _0: x + p.x, _1: y - p.y};
+};
 var _user$project$Main$moveLeft = function (model) {
 	var h = _user$project$Main$head(model.snake);
 	var point$ = (_elm_lang$core$Native_Utils.cmp(h.x - 10, 0 - _user$project$Main$maxX) < 0) ? A2(_user$project$Main$newPoint, _user$project$Main$maxX, h.y) : A2(_user$project$Main$newPoint, h.x - 10, h.y);

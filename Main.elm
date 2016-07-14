@@ -34,10 +34,10 @@ snakeColor : String
 snakeColor = "green"
 
 maxX : Int
-maxX = 1000
+maxX = 200
 
 maxY : Int
-maxY = 500
+maxY = 100
 
 
 main : Program Never
@@ -86,9 +86,10 @@ toPixel x =
 toPixelCoordinates : Point -> (Int, Int)
 toPixelCoordinates p =
     let
-        {x, y} = newPoint 200 50 
+        {x, y} = newPoint maxX maxY
     in
-        (p.x - x, y - p.y)
+--        (p.x - x, y - p.y)
+        (x + p.x, y - p.y)
 
 
 viewBlock : (Int, Int) -> String -> Html Msg

@@ -24,6 +24,8 @@ CLOSED: [2016-07-14 Thu 08:45]
 ** DONE other game links (asteroids, bomberman)
 CLOSED: [2016-07-12 Tue 23:54]
 ** TODO control board boundaries
+** DONE handle snake velocity
+CLOSED: [2016-07-14 Thu 20:13]
 ** TODO randomize food position
 ** TODO log to the console
 ** DONE CSS positioning
@@ -36,6 +38,9 @@ No need to know key codes. This could be hidden in the module.
 ** TODO Maybe
 ** TODO HowTo handle errors
 
+** ubiquitous language
+
+
 * nice to have
 ** best way to draw the snake (SVG, CSS, chars, others)?
 ** multiple snakes
@@ -45,7 +50,6 @@ No need to know key codes. This could be hidden in the module.
 ** mobile
 ** mobile native
 ** scoring
-** handle snake velocity
 ** different velocities based on level or snake length
 
 
