@@ -19,9 +19,12 @@ CLOSED: [2016-07-12 Tue 23:48]
 CLOSED: [2016-07-13 Wed 08:44]
 ** DONE Snake Segments
 CLOSED: [2016-07-13 Wed 21:47]
-** TODO Food
+** DONE Food
+CLOSED: [2016-07-14 Thu 08:45]
 ** DONE other game links (asteroids, bomberman)
 CLOSED: [2016-07-12 Tue 23:54]
+** TODO control board boundaries
+** TODO randomize food position
 ** TODO log to the console
 ** DONE CSS positioning
 CLOSED: [2016-07-12 Tue 08:40]
@@ -32,10 +35,8 @@ No need to know key codes. This could be hidden in the module.
 >>, <<, and other functions.
 ** TODO Maybe
 ** TODO HowTo handle errors
-** TODO randomize item position
 
 * nice to have
-** control board boundaries
 ** best way to draw the snake (SVG, CSS, chars, others)?
 ** multiple snakes
 ** mouse control

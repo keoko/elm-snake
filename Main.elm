@@ -19,6 +19,7 @@ type alias Snake = List Point
 type Msg = TimeUpdate  Time
       | KeyUp KeyCode
       | KeyDown KeyCode
+      | None
 
 type Direction = Up | Down | Left | Right
 
@@ -68,6 +69,8 @@ init =
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
+        None ->
+            model ! []
         KeyUp keycode ->
             (keyUp keycode model) ! []
         KeyDown keyCode ->
@@ -120,7 +123,11 @@ subscriptions model =
     Sub.batch
         [ Keyboard.ups KeyUp
         , Keyboard.downs KeyDown
-        , AnimationFrame.diffs TimeUpdate
+        , AnimationFrame.diffs (\time ->
+                                    if ((round time) `rem` 3 == 0) then
+                                        TimeUpdate time
+                                    else
+                                        None)
         ]
 
 moveHead : Model -> Point -> Model

@@ -8609,6 +8609,7 @@ var _user$project$Main$Point = F2(
 	function (a, b) {
 		return {x: a, y: b};
 	});
+var _user$project$Main$None = {ctor: 'None'};
 var _user$project$Main$KeyDown = function (a) {
 	return {ctor: 'KeyDown', _0: a};
 };
@@ -8624,7 +8625,15 @@ var _user$project$Main$subscriptions = function (model) {
 			[
 				_elm_lang$keyboard$Keyboard$ups(_user$project$Main$KeyUp),
 				_elm_lang$keyboard$Keyboard$downs(_user$project$Main$KeyDown),
-				_elm_lang$animation_frame$AnimationFrame$diffs(_user$project$Main$TimeUpdate)
+				_elm_lang$animation_frame$AnimationFrame$diffs(
+				function (time) {
+					return _elm_lang$core$Native_Utils.eq(
+						A2(
+							_elm_lang$core$Basics$rem,
+							_elm_lang$core$Basics$round(time),
+							3),
+						0) ? _user$project$Main$TimeUpdate(time) : _user$project$Main$None;
+				})
 			]));
 };
 var _user$project$Main$Right = {ctor: 'Right'};
@@ -8662,6 +8671,12 @@ var _user$project$Main$update = F2(
 	function (msg, model) {
 		var _p5 = msg;
 		switch (_p5.ctor) {
+			case 'None':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					model,
+					_elm_lang$core$Native_List.fromArray(
+						[]));
 			case 'KeyUp':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
