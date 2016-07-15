@@ -8435,6 +8435,126 @@ var _elm_lang$keyboard$Keyboard$subMap = F2(
 			});
 	});
 _elm_lang$core$Native_Platform.effectManagers['Keyboard'] = {pkg: 'elm-lang/keyboard', init: _elm_lang$keyboard$Keyboard$init, onEffects: _elm_lang$keyboard$Keyboard$onEffects, onSelfMsg: _elm_lang$keyboard$Keyboard$onSelfMsg, tag: 'sub', subMap: _elm_lang$keyboard$Keyboard$subMap};
+var _elm_lang$window$Native_Window = function()
+{
+
+var size = _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)	{
+	callback(_elm_lang$core$Native_Scheduler.succeed({
+		width: window.innerWidth,
+		height: window.innerHeight
+	}));
+});
+
+return {
+	size: size
+};
+
+}();var _elm_lang$window$Window_ops = _elm_lang$window$Window_ops || {};
+_elm_lang$window$Window_ops['&>'] = F2(
+	function (t1, t2) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			t1,
+			function (_p0) {
+				return t2;
+			});
+	});
+var _elm_lang$window$Window$onSelfMsg = F3(
+	function (router, dimensions, state) {
+		var _p1 = state;
+		if (_p1.ctor === 'Nothing') {
+			return _elm_lang$core$Task$succeed(state);
+		} else {
+			var send = function (_p2) {
+				var _p3 = _p2;
+				return A2(
+					_elm_lang$core$Platform$sendToApp,
+					router,
+					_p3._0(dimensions));
+			};
+			return A2(
+				_elm_lang$window$Window_ops['&>'],
+				_elm_lang$core$Task$sequence(
+					A2(_elm_lang$core$List$map, send, _p1._0.subs)),
+				_elm_lang$core$Task$succeed(state));
+		}
+	});
+var _elm_lang$window$Window$init = _elm_lang$core$Task$succeed(_elm_lang$core$Maybe$Nothing);
+var _elm_lang$window$Window$size = _elm_lang$window$Native_Window.size;
+var _elm_lang$window$Window$width = A2(
+	_elm_lang$core$Task$map,
+	function (_) {
+		return _.width;
+	},
+	_elm_lang$window$Window$size);
+var _elm_lang$window$Window$height = A2(
+	_elm_lang$core$Task$map,
+	function (_) {
+		return _.height;
+	},
+	_elm_lang$window$Window$size);
+var _elm_lang$window$Window$onEffects = F3(
+	function (router, newSubs, oldState) {
+		var _p4 = {ctor: '_Tuple2', _0: oldState, _1: newSubs};
+		if (_p4._0.ctor === 'Nothing') {
+			if (_p4._1.ctor === '[]') {
+				return _elm_lang$core$Task$succeed(_elm_lang$core$Maybe$Nothing);
+			} else {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					_elm_lang$core$Process$spawn(
+						A3(
+							_elm_lang$dom$Dom_LowLevel$onWindow,
+							'resize',
+							_elm_lang$core$Json_Decode$succeed(
+								{ctor: '_Tuple0'}),
+							function (_p5) {
+								return A2(
+									_elm_lang$core$Task$andThen,
+									_elm_lang$window$Window$size,
+									_elm_lang$core$Platform$sendToSelf(router));
+							})),
+					function (pid) {
+						return _elm_lang$core$Task$succeed(
+							_elm_lang$core$Maybe$Just(
+								{subs: newSubs, pid: pid}));
+					});
+			}
+		} else {
+			if (_p4._1.ctor === '[]') {
+				return A2(
+					_elm_lang$window$Window_ops['&>'],
+					_elm_lang$core$Process$kill(_p4._0._0.pid),
+					_elm_lang$core$Task$succeed(_elm_lang$core$Maybe$Nothing));
+			} else {
+				return _elm_lang$core$Task$succeed(
+					_elm_lang$core$Maybe$Just(
+						{subs: newSubs, pid: _p4._0._0.pid}));
+			}
+		}
+	});
+var _elm_lang$window$Window$subscription = _elm_lang$core$Native_Platform.leaf('Window');
+var _elm_lang$window$Window$Size = F2(
+	function (a, b) {
+		return {width: a, height: b};
+	});
+var _elm_lang$window$Window$MySub = function (a) {
+	return {ctor: 'MySub', _0: a};
+};
+var _elm_lang$window$Window$resizes = function (tagger) {
+	return _elm_lang$window$Window$subscription(
+		_elm_lang$window$Window$MySub(tagger));
+};
+var _elm_lang$window$Window$subMap = F2(
+	function (func, _p6) {
+		var _p7 = _p6;
+		return _elm_lang$window$Window$MySub(
+			function (_p8) {
+				return func(
+					_p7._0(_p8));
+			});
+	});
+_elm_lang$core$Native_Platform.effectManagers['Window'] = {pkg: 'elm-lang/window', init: _elm_lang$window$Window$init, onEffects: _elm_lang$window$Window$onEffects, onSelfMsg: _elm_lang$window$Window$onSelfMsg, tag: 'sub', subMap: _elm_lang$window$Window$subMap};
 var _user$project$Main$newPoint = F2(
 	function (x, y) {
 		return {x: x, y: y};
@@ -8468,6 +8588,13 @@ var _user$project$Main$moveHead = F2(
 				snake: A2(_elm_lang$core$List_ops['::'], point, model.snake)
 			});
 	});
+var _user$project$Main$toBrowserCoordinates = F2(
+	function (origin, p) {
+		var _p0 = origin;
+		var x = _p0._0;
+		var y = _p0._1;
+		return {ctor: '_Tuple2', _0: x + p.x, _1: y - p.y};
+	});
 var _user$project$Main$toPixel = function (x) {
 	return A2(
 		_elm_lang$core$Basics_ops['++'],
@@ -8475,8 +8602,8 @@ var _user$project$Main$toPixel = function (x) {
 		'px');
 };
 var _user$project$Main$viewBlock = F2(
-	function (_p0, color) {
-		var _p1 = _p0;
+	function (_p1, color) {
+		var _p2 = _p1;
 		return A2(
 			_elm_lang$html$Html$div,
 			_elm_lang$core$Native_List.fromArray(
@@ -8489,12 +8616,12 @@ var _user$project$Main$viewBlock = F2(
 							{
 							ctor: '_Tuple2',
 							_0: 'top',
-							_1: _user$project$Main$toPixel(_p1._1)
+							_1: _user$project$Main$toPixel(_p2._1)
 						},
 							{
 							ctor: '_Tuple2',
 							_0: 'left',
-							_1: _user$project$Main$toPixel(_p1._0)
+							_1: _user$project$Main$toPixel(_p2._0)
 						},
 							{ctor: '_Tuple2', _0: 'width', _1: '10px'},
 							{ctor: '_Tuple2', _0: 'height', _1: '10px'},
@@ -8503,6 +8630,18 @@ var _user$project$Main$viewBlock = F2(
 				]),
 			_elm_lang$core$Native_List.fromArray(
 				[]));
+	});
+var _user$project$Main$recalculateOrigin = F2(
+	function (model, size) {
+		var top = (size.height / 2) | 0;
+		var left = (size.width / 2) | 0;
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				origin: {ctor: '_Tuple2', _0: left, _1: top},
+				maxX: left,
+				maxY: top
+			});
 	});
 var _user$project$Main$initialFoodPoint = A2(_user$project$Main$newPoint, 200, 0);
 var _user$project$Main$nextFood = function (food) {
@@ -8522,40 +8661,24 @@ var _user$project$Main$head = function (snake) {
 		_user$project$Main$initialPoint,
 		_elm_lang$core$List$head(snake));
 };
-var _user$project$Main$canEatFood = function (model) {
-	return _elm_lang$core$Native_Utils.eq(
-		_user$project$Main$head(model.snake),
-		model.food);
-};
-var _user$project$Main$checkForFood = function (model) {
-	return _user$project$Main$canEatFood(model) ? _user$project$Main$eatFood(model) : _user$project$Main$moveTail(model);
-};
-var _user$project$Main$maxY = 100;
 var _user$project$Main$moveUp = function (model) {
 	var h = _user$project$Main$head(model.snake);
-	var point$ = (_elm_lang$core$Native_Utils.cmp(h.y + 10, _user$project$Main$maxY) > 0) ? A2(_user$project$Main$newPoint, h.x, 0 - _user$project$Main$maxY) : A2(_user$project$Main$newPoint, h.x, h.y + 10);
+	var point$ = (_elm_lang$core$Native_Utils.cmp(h.y + 10, model.maxY) > 0) ? A2(_user$project$Main$newPoint, h.x, 0 - model.maxY) : A2(_user$project$Main$newPoint, h.x, h.y + 10);
 	return A2(_user$project$Main$moveHead, model, point$);
 };
 var _user$project$Main$moveDown = function (model) {
 	var h = _user$project$Main$head(model.snake);
-	var point$ = (_elm_lang$core$Native_Utils.cmp(h.y - 10, 0 - _user$project$Main$maxY) < 0) ? A2(_user$project$Main$newPoint, h.x, _user$project$Main$maxY) : A2(_user$project$Main$newPoint, h.x, h.y - 10);
+	var point$ = (_elm_lang$core$Native_Utils.cmp(h.y - 10, 0 - model.maxY) < 0) ? A2(_user$project$Main$newPoint, h.x, model.maxY) : A2(_user$project$Main$newPoint, h.x, h.y - 10);
 	return A2(_user$project$Main$moveHead, model, point$);
-};
-var _user$project$Main$maxX = 200;
-var _user$project$Main$toPixelCoordinates = function (p) {
-	var _p2 = A2(_user$project$Main$newPoint, _user$project$Main$maxX, _user$project$Main$maxY);
-	var x = _p2.x;
-	var y = _p2.y;
-	return {ctor: '_Tuple2', _0: x + p.x, _1: y - p.y};
 };
 var _user$project$Main$moveLeft = function (model) {
 	var h = _user$project$Main$head(model.snake);
-	var point$ = (_elm_lang$core$Native_Utils.cmp(h.x - 10, 0 - _user$project$Main$maxX) < 0) ? A2(_user$project$Main$newPoint, _user$project$Main$maxX, h.y) : A2(_user$project$Main$newPoint, h.x - 10, h.y);
+	var point$ = (_elm_lang$core$Native_Utils.cmp(h.x - 10, 0 - model.maxX) < 0) ? A2(_user$project$Main$newPoint, model.maxX, h.y) : A2(_user$project$Main$newPoint, h.x - 10, h.y);
 	return A2(_user$project$Main$moveHead, model, point$);
 };
 var _user$project$Main$moveRight = function (model) {
 	var h = _user$project$Main$head(model.snake);
-	var point$ = (_elm_lang$core$Native_Utils.cmp(h.x + 10, _user$project$Main$maxX) > 0) ? A2(_user$project$Main$newPoint, 0 - _user$project$Main$maxX, h.y) : A2(_user$project$Main$newPoint, h.x + 10, h.y);
+	var point$ = (_elm_lang$core$Native_Utils.cmp(h.x + 10, model.maxX) > 0) ? A2(_user$project$Main$newPoint, 0 - model.maxX, h.y) : A2(_user$project$Main$newPoint, h.x + 10, h.y);
 	return A2(_user$project$Main$moveHead, model, point$);
 };
 var _user$project$Main$moveSnake = function (model) {
@@ -8570,6 +8693,14 @@ var _user$project$Main$moveSnake = function (model) {
 		default:
 			return _user$project$Main$moveRight(model);
 	}
+};
+var _user$project$Main$canEatFood = function (model) {
+	return _elm_lang$core$Native_Utils.eq(
+		_user$project$Main$head(model.snake),
+		model.food);
+};
+var _user$project$Main$checkForFood = function (model) {
+	return _user$project$Main$canEatFood(model) ? _user$project$Main$eatFood(model) : _user$project$Main$moveTail(model);
 };
 var _user$project$Main$nextStep = function (model) {
 	return _user$project$Main$checkForFood(
@@ -8588,28 +8719,50 @@ var _user$project$Main$view = function (model) {
 		_elm_lang$core$List$map,
 		function (p) {
 			return _user$project$Main$viewSnakeSegment(
-				_user$project$Main$toPixelCoordinates(p));
+				A2(_user$project$Main$toBrowserCoordinates, model.origin, p));
 		},
 		model.snake);
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
 			[]),
-		A2(
-			_elm_lang$core$List_ops['::'],
-			_user$project$Main$viewFood(
-				_user$project$Main$toPixelCoordinates(_user$project$Main$initialFoodPoint)),
-			snake));
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_elm_lang$html$Html$text(
+				_elm_lang$core$Basics$toString(model.origin)),
+				A2(
+				_elm_lang$html$Html$div,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				A2(
+					_elm_lang$core$List_ops['::'],
+					_user$project$Main$viewFood(
+						A2(_user$project$Main$toBrowserCoordinates, model.origin, _user$project$Main$initialFoodPoint)),
+					snake))
+			]));
 };
-var _user$project$Main$Model = F3(
-	function (a, b, c) {
-		return {snake: a, direction: b, food: c};
+var _user$project$Main$Model = F6(
+	function (a, b, c, d, e, f) {
+		return {snake: a, direction: b, food: c, origin: d, maxX: e, maxY: f};
 	});
 var _user$project$Main$Point = F2(
 	function (a, b) {
 		return {x: a, y: b};
 	});
 var _user$project$Main$None = {ctor: 'None'};
+var _user$project$Main$OriginRecalculate = function (a) {
+	return {ctor: 'OriginRecalculate', _0: a};
+};
+var _user$project$Main$recalculateOriginMsg = function (size) {
+	return _user$project$Main$OriginRecalculate(size);
+};
+var _user$project$Main$initialOrigin = A3(
+	_elm_lang$core$Task$perform,
+	function (_p4) {
+		return _user$project$Main$None;
+	},
+	_user$project$Main$recalculateOriginMsg,
+	_elm_lang$window$Window$size);
 var _user$project$Main$KeyDown = function (a) {
 	return {ctor: 'KeyDown', _0: a};
 };
@@ -8625,13 +8778,14 @@ var _user$project$Main$subscriptions = function (model) {
 			[
 				_elm_lang$keyboard$Keyboard$ups(_user$project$Main$KeyUp),
 				_elm_lang$keyboard$Keyboard$downs(_user$project$Main$KeyDown),
+				_elm_lang$window$Window$resizes(_user$project$Main$recalculateOriginMsg),
 				_elm_lang$animation_frame$AnimationFrame$diffs(
 				function (time) {
 					return _elm_lang$core$Native_Utils.eq(
 						A2(
 							_elm_lang$core$Basics$rem,
 							_elm_lang$core$Basics$round(time),
-							3),
+							2),
 						0) ? _user$project$Main$TimeUpdate(time) : _user$project$Main$None;
 				})
 			]));
@@ -8646,15 +8800,18 @@ var _user$project$Main$model = {
 			A2(_user$project$Main$newPoint, 502, 0)
 		]),
 	direction: _user$project$Main$Left,
-	food: _user$project$Main$initialFoodPoint
+	food: _user$project$Main$initialFoodPoint,
+	origin: {ctor: '_Tuple2', _0: 0, _1: 0},
+	maxX: 100,
+	maxY: 100
 };
-var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Main$model, _1: _elm_lang$core$Platform_Cmd$none};
+var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Main$model, _1: _user$project$Main$initialOrigin};
 var _user$project$Main$Down = {ctor: 'Down'};
 var _user$project$Main$Up = {ctor: 'Up'};
 var _user$project$Main$keyUp = F2(
 	function (keyCode, model) {
-		var _p4 = keyCode;
-		switch (_p4) {
+		var _p5 = keyCode;
+		switch (_p5) {
 			case 38:
 				return A2(_user$project$Main$changeDirection, model, _user$project$Main$Up);
 			case 40:
@@ -8669,8 +8826,8 @@ var _user$project$Main$keyUp = F2(
 	});
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p5 = msg;
-		switch (_p5.ctor) {
+		var _p6 = msg;
+		switch (_p6.ctor) {
 			case 'None':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
@@ -8680,7 +8837,7 @@ var _user$project$Main$update = F2(
 			case 'KeyUp':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					A2(_user$project$Main$keyUp, _p5._0, model),
+					A2(_user$project$Main$keyUp, _p6._0, model),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			case 'KeyDown':
@@ -8689,10 +8846,16 @@ var _user$project$Main$update = F2(
 					model,
 					_elm_lang$core$Native_List.fromArray(
 						[]));
-			default:
+			case 'TimeUpdate':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_user$project$Main$nextStep(model),
+					_elm_lang$core$Native_List.fromArray(
+						[]));
+			default:
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					A2(_user$project$Main$recalculateOrigin, model, _p6._0),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 		}

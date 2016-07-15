@@ -6,12 +6,17 @@ import Html.Attributes exposing (id, style)
 import Keyboard exposing (KeyCode)
 import AnimationFrame
 import Time exposing (Time)
+import Task
+import Window
 
 
 type alias Model =
     { snake : Snake
     , direction : Direction
     , food : Point
+    , origin : (Int, Int)
+    , maxX : Int
+    , maxY : Int
     }
 
 type alias Snake = List Point
@@ -19,6 +24,7 @@ type alias Snake = List Point
 type Msg = TimeUpdate  Time
       | KeyUp KeyCode
       | KeyDown KeyCode
+      | OriginRecalculate Window.Size
       | None
 
 type Direction = Up | Down | Left | Right
@@ -32,13 +38,6 @@ foodColor = "red"
 
 snakeColor : String
 snakeColor = "green"
-
-maxX : Int
-maxX = 200
-
-maxY : Int
-maxY = 100
-
 
 main : Program Never
 main =
@@ -60,11 +59,22 @@ model =
     { snake = [initialPoint, (newPoint 501 0), (newPoint 502 0)]
     , direction = Left
     , food = initialFoodPoint
+    , origin = (0, 0)
+    , maxX = 100
+    , maxY = 100
     }
 
 init : (Model, Cmd Msg)
 init =
-    (model, Cmd.none)
+    (model, initialOrigin)
+
+initialOrigin : Cmd Msg
+initialOrigin =
+    Task.perform  (\_ -> None) recalculateOriginMsg Window.size
+
+recalculateOriginMsg : Window.Size -> Msg
+recalculateOriginMsg size =
+    OriginRecalculate size
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -77,18 +87,30 @@ update msg model =
             model ! []
         TimeUpdate t ->
             (nextStep model) ! []
+        OriginRecalculate size ->
+            (recalculateOrigin model size) ! []
 
+
+recalculateOrigin : Model -> Window.Size -> Model
+recalculateOrigin model size =
+    let
+        left = (size.width // 2)
+        top = (size.height // 2)
+    in
+        { model | origin = (left, top)
+        , maxX = left
+        , maxY = top
+        }
 
 toPixel : Int -> String
 toPixel x =
     (toString x) ++ "px"
 
-toPixelCoordinates : Point -> (Int, Int)
-toPixelCoordinates p =
+toBrowserCoordinates : (Int, Int) -> Point -> (Int, Int)
+toBrowserCoordinates origin p =
     let
-        {x, y} = newPoint maxX maxY
+        (x, y) = origin
     in
---        (p.x - x, y - p.y)
         (x + p.x, y - p.y)
 
 
@@ -115,21 +137,27 @@ viewSnakeSegment p = viewBlock p snakeColor
 view : Model -> Html Msg
 view model =
     let
-        snake = List.map (\p -> p |> toPixelCoordinates |> viewSnakeSegment) model.snake
+        snake = List.map (\p -> p |> toBrowserCoordinates model.origin |> viewSnakeSegment) model.snake
     in
-        div [] ((viewFood (toPixelCoordinates initialFoodPoint)) :: snake)
+        div []
+        [
+         text (toString model.origin)
+         ,div [] ((viewFood (toBrowserCoordinates model.origin initialFoodPoint)) :: snake)
+        ]
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Keyboard.ups KeyUp
         , Keyboard.downs KeyDown
+        , Window.resizes recalculateOriginMsg
         , AnimationFrame.diffs (\time ->
-                                    if ((round time) `rem` 3 == 0) then
+                                    if ((round time) `rem` 2 == 0) then
                                         TimeUpdate time
                                     else
                                         None)
         ]
+
 
 moveHead : Model -> Point -> Model
 moveHead model point =
@@ -144,8 +172,8 @@ moveUp : Model -> Model
 moveUp model =
     let
         h = head model.snake
-        point' = if (h.y + 10 > maxY) then
-                     newPoint h.x (0 - maxY)
+        point' = if (h.y + 10 > model.maxY) then
+                     newPoint h.x (0 - model.maxY)
                  else
                      newPoint h.x (h.y + 10)
     in
@@ -155,8 +183,8 @@ moveDown : Model -> Model
 moveDown model =
     let
         h = head model.snake
-        point' = if (h.y - 10 < (0 - maxY)) then
-                     newPoint h.x maxY
+        point' = if (h.y - 10 < (0 - model.maxY)) then
+                     newPoint h.x model.maxY
                  else
                      newPoint h.x (h.y - 10)
     in
@@ -166,8 +194,8 @@ moveLeft : Model -> Model
 moveLeft model =
     let
         h = head model.snake
-        point' = if (h.x - 10 < (0 - maxX)) then
-                     newPoint maxX h.y
+        point' = if (h.x - 10 < (0 - model.maxX)) then
+                     newPoint model.maxX h.y
                  else
                      newPoint (h.x - 10) h.y
     in
@@ -177,8 +205,8 @@ moveRight : Model -> Model
 moveRight model =
     let
         h = head model.snake
-        point' = if (h.x + 10 > maxX) then
-                     newPoint (0 - maxX) h.y
+        point' = if (h.x + 10 > model.maxX) then
+                     newPoint (0 - model.maxX) h.y
                  else
                      newPoint (h.x + 10) h.y
     in

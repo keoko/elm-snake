@@ -23,22 +23,22 @@ CLOSED: [2016-07-13 Wed 21:47]
 CLOSED: [2016-07-14 Thu 08:45]
 ** DONE other game links (asteroids, bomberman)
 CLOSED: [2016-07-12 Tue 23:54]
-** TODO control board boundaries
+** DONE control board boundaries
+CLOSED: [2016-07-14 Thu 21:24]
 ** DONE handle snake velocity
 CLOSED: [2016-07-14 Thu 20:13]
 ** TODO randomize food position
 ** TODO log to the console
 ** DONE CSS positioning
 CLOSED: [2016-07-12 Tue 08:40]
-** TODO Key model is necessary?
-No need to know key codes. This could be hidden in the module.
 ** TODO Start, Game, End pages
 ** TODO reduce number of parenthesis
 >>, <<, and other functions.
+** TODO window dimensions
 ** TODO Maybe
 ** TODO HowTo handle errors
-
-** ubiquitous language
+** TODO Key model is necessary?
+No need to know key codes. This could be hidden in the module.
 
 
 * nice to have
