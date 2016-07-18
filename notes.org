@@ -27,6 +27,8 @@ CLOSED: [2016-07-12 Tue 23:54]
 CLOSED: [2016-07-14 Thu 21:24]
 ** DONE handle snake velocity
 CLOSED: [2016-07-14 Thu 20:13]
+** DONE recalculate coordinates based on window resizing
+CLOSED: [2016-07-15 Fri 07:33]
 ** TODO randomize food position
 ** TODO log to the console
 ** DONE CSS positioning
@@ -39,6 +41,7 @@ CLOSED: [2016-07-12 Tue 08:40]
 ** TODO HowTo handle errors
 ** TODO Key model is necessary?
 No need to know key codes. This could be hidden in the module.
+** TODO on window resize move the snake to a visible area
 
 
 * nice to have
@@ -63,3 +66,12 @@ https://ohanhi.github.io/base-for-game-elm-017.html
 https://www.gitbook.com/book/sbaechler/elm-hexagon/details
 http://sonnym.github.io/2014/05/05/writing-game-of-life-in-elm/
 http://www.elmfiddle.io/view/ciohidiwb0000ittvijce7hy5
+http://guide.elm-lang.org/architecture/effects/random.html
+
+
+* Issues
+** cannot destructure tuple in repl
+https://github.com/elm-lang/elm-repl/issues/68
+
+** blank page after installing AnimationFrame package
+just removed the elm-stuff directory and it worked. No clue what happened.

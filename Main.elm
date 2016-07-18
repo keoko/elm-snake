@@ -8,6 +8,8 @@ import AnimationFrame
 import Time exposing (Time)
 import Task
 import Window
+import Random exposing (initialSeed, Seed, Generator, generate)
+import Debug exposing (log)
 
 
 type alias Model =
@@ -17,6 +19,7 @@ type alias Model =
     , origin : (Int, Int)
     , maxX : Int
     , maxY : Int
+    , seed : Seed
     }
 
 type alias Snake = List Point
@@ -25,6 +28,7 @@ type Msg = TimeUpdate  Time
       | KeyUp KeyCode
       | KeyDown KeyCode
       | OriginRecalculate Window.Size
+      | NextFood Point
       | None
 
 type Direction = Up | Down | Left | Right
@@ -54,6 +58,7 @@ initialPoint = newPoint 500 0
 initialFoodPoint : Point
 initialFoodPoint = newPoint 200 0
 
+
 model : Model
 model =
     { snake = [initialPoint, (newPoint 501 0), (newPoint 502 0)]
@@ -62,6 +67,7 @@ model =
     , origin = (0, 0)
     , maxX = 100
     , maxY = 100
+    , seed = initialSeed 1000
     }
 
 init : (Model, Cmd Msg)
@@ -86,9 +92,14 @@ update msg model =
         KeyDown keyCode ->
             model ! []
         TimeUpdate t ->
-            (nextStep model) ! []
+            nextStep model
         OriginRecalculate size ->
             (recalculateOrigin model size) ! []
+        NextFood point ->
+            let
+                a = Debug.log "next food" <| toString point
+            in
+                (nextFood model point) ! []
 
 
 recalculateOrigin : Model -> Window.Size -> Model
@@ -137,12 +148,13 @@ viewSnakeSegment p = viewBlock p snakeColor
 view : Model -> Html Msg
 view model =
     let
+        food = viewFood (toBrowserCoordinates model.origin model.food)
         snake = List.map (\p -> p |> toBrowserCoordinates model.origin |> viewSnakeSegment) model.snake
     in
         div []
         [
-         text (toString model.origin)
-         ,div [] ((viewFood (toBrowserCoordinates model.origin initialFoodPoint)) :: snake)
+         text <| (toString model.food) ++ (toString <| head model.snake)
+         ,div [] (food :: snake)
         ]
 
 subscriptions : Model -> Sub Msg
@@ -152,7 +164,7 @@ subscriptions model =
         , Keyboard.downs KeyDown
         , Window.resizes recalculateOriginMsg
         , AnimationFrame.diffs (\time ->
-                                    if ((round time) `rem` 2 == 0) then
+                                    if ((round time) `rem` 1 == 0) then
                                         TimeUpdate time
                                     else
                                         None)
@@ -172,10 +184,10 @@ moveUp : Model -> Model
 moveUp model =
     let
         h = head model.snake
-        point' = if (h.y + 10 > model.maxY) then
+        point' = if (h.y + 1 > model.maxY) then
                      newPoint h.x (0 - model.maxY)
                  else
-                     newPoint h.x (h.y + 10)
+                     newPoint h.x (h.y + 1)
     in
         moveHead model point'
 
@@ -183,10 +195,10 @@ moveDown : Model -> Model
 moveDown model =
     let
         h = head model.snake
-        point' = if (h.y - 10 < (0 - model.maxY)) then
+        point' = if (h.y - 1 < (0 - model.maxY)) then
                      newPoint h.x model.maxY
                  else
-                     newPoint h.x (h.y - 10)
+                     newPoint h.x (h.y - 1)
     in
         moveHead model point'
 
@@ -194,10 +206,10 @@ moveLeft : Model -> Model
 moveLeft model =
     let
         h = head model.snake
-        point' = if (h.x - 10 < (0 - model.maxX)) then
+        point' = if (h.x - 1 < (0 - model.maxX)) then
                      newPoint model.maxX h.y
                  else
-                     newPoint (h.x - 10) h.y
+                     newPoint (h.x - 1) h.y
     in
         moveHead model point'
 
@@ -205,10 +217,10 @@ moveRight : Model -> Model
 moveRight model =
     let
         h = head model.snake
-        point' = if (h.x + 10 > model.maxX) then
+        point' = if (h.x + 1 > model.maxX) then
                      newPoint (0 - model.maxX) h.y
                  else
-                     newPoint (h.x + 10) h.y
+                     newPoint (h.x + 1) h.y
     in
         moveHead model point'
 
@@ -225,27 +237,36 @@ moveSnake model =
         Right ->
             moveRight model
 
-nextStep : Model -> Model
+nextStep : Model -> (Model, Cmd Msg)
 nextStep model =
     model
         |> moveSnake
         |> checkForFood
 
 
-checkForFood : Model -> Model
+checkForFood : Model -> (Model, Cmd Msg)
 checkForFood model =
     if canEatFood model then
         eatFood model
     else
         moveTail model
 
-eatFood : Model -> Model
-eatFood model =
-    { model | food = nextFood model.food }
 
-nextFood : Point -> Point
-nextFood food =
-    initialFoodPoint
+randomPoint : Model -> Generator Point
+randomPoint model =
+    let
+        --r = Random.pair (Random.int (0 - model.maxX) model.maxX) (Random.int (0 - model.maxY) model.maxY)
+        r = Random.pair (Random.int (0 - model.maxX) model.maxX) (Random.int 0 0)
+    in
+        Random.map (\(x,y) -> newPoint x y) r
+
+eatFood : Model -> (Model, Cmd Msg)
+eatFood model =
+    (model, generate NextFood (randomPoint model) )
+
+nextFood : Model -> Point -> Model
+nextFood model point =
+    { model | food = point }
 
 
 canEatFood : Model -> Bool
@@ -256,12 +277,12 @@ growSnake : Model -> Model
 growSnake model =
     model
 
-moveTail : Model -> Model
+moveTail : Model -> (Model, Cmd Msg)
 moveTail model =
     let
         l = List.length model.snake
     in
-        { model | snake = List.take (l-1) model.snake }
+        { model | snake = List.take (l-1) model.snake } ! []
 
 
 keyUp : KeyCode -> Model -> Model
