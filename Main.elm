@@ -14,7 +14,6 @@ import Debug exposing (log)
 
 type alias Model =
     { snake : Snake
-    , direction : Direction
     , food : Point
     , origin : (Int, Int)
     , maxX : Int
@@ -22,7 +21,11 @@ type alias Model =
     , seed : Seed
     }
 
-type alias Snake = List Point
+type alias Snake =
+    { body : List Point
+    , direction : Direction
+    , color : String
+    }
 
 type Msg = TimeUpdate  Time
       | KeyUp KeyCode
@@ -61,8 +64,7 @@ initialFoodPoint = newPoint 200 0
 
 model : Model
 model =
-    { snake = [initialPoint, (newPoint 501 0), (newPoint 502 0)]
-    , direction = Left
+    { snake = newSnake [initialPoint, (newPoint 501 0), (newPoint 502 0)] Left "green"
     , food = initialFoodPoint
     , origin = (0, 0)
     , maxX = 100
@@ -149,7 +151,7 @@ view : Model -> Html Msg
 view model =
     let
         food = viewFood (toBrowserCoordinates model.origin model.food)
-        snake = List.map (\p -> p |> toBrowserCoordinates model.origin |> viewSnakeSegment) model.snake
+        snake = List.map (\p -> p |> toBrowserCoordinates model.origin |> viewSnakeSegment) model.snake.body
     in
         div []
         [
@@ -173,12 +175,15 @@ subscriptions model =
 
 moveHead : Model -> Point -> Model
 moveHead model point =
-    { model | snake = (point :: model.snake) }
+    let
+        snake = newSnake (point :: model.snake.body) model.snake.direction model.snake.color
+    in
+        { model | snake = snake }
 
 
 head : Snake -> Point
 head snake =
-    Maybe.withDefault initialPoint (List.head snake)
+    Maybe.withDefault initialPoint (List.head snake.body)
 
 moveUp : Model -> Model
 moveUp model =
@@ -227,7 +232,7 @@ moveRight model =
 
 moveSnake : Model -> Model
 moveSnake model =
-    case model.direction of
+    case model.snake.direction of
         Up ->
             moveUp model
         Down ->
@@ -280,9 +285,10 @@ growSnake model =
 moveTail : Model -> (Model, Cmd Msg)
 moveTail model =
     let
-        l = List.length model.snake
+        l = List.length model.snake.body
+        snake = newSnake (List.take (l-1) model.snake.body) model.snake.direction model.snake.color
     in
-        { model | snake = List.take (l-1) model.snake } ! []
+        { model | snake = snake } ! []
 
 
 keyUp : KeyCode -> Model -> Model
@@ -305,11 +311,18 @@ keyDown keyCode model =
 
 changeDirection : Model -> Direction -> Model
 changeDirection model  direction =
-    { model | direction = direction }
+    { model | snake = newSnake model.snake.body direction model.snake.color }
 
 
 newPoint : Int -> Int -> Point
 newPoint x y =
     { x = x
     , y = y
+    }
+
+newSnake : List Point -> Direction -> String -> Snake
+newSnake body direction color =
+    { body = body
+    , direction = direction
+    , color = color
     }

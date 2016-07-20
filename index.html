@@ -8934,6 +8934,10 @@ var _elm_lang$window$Window$subMap = F2(
 			});
 	});
 _elm_lang$core$Native_Platform.effectManagers['Window'] = {pkg: 'elm-lang/window', init: _elm_lang$window$Window$init, onEffects: _elm_lang$window$Window$onEffects, onSelfMsg: _elm_lang$window$Window$onSelfMsg, tag: 'sub', subMap: _elm_lang$window$Window$subMap};
+var _user$project$Main$newSnake = F3(
+	function (body, direction, color) {
+		return {body: body, direction: direction, color: color};
+	});
 var _user$project$Main$newPoint = F2(
 	function (x, y) {
 		return {x: x, y: y};
@@ -8942,21 +8946,26 @@ var _user$project$Main$changeDirection = F2(
 	function (model, direction) {
 		return _elm_lang$core$Native_Utils.update(
 			model,
-			{direction: direction});
+			{
+				snake: A3(_user$project$Main$newSnake, model.snake.body, direction, model.snake.color)
+			});
 	});
 var _user$project$Main$keyDown = F2(
 	function (keyCode, model) {
 		return model;
 	});
 var _user$project$Main$moveTail = function (model) {
-	var l = _elm_lang$core$List$length(model.snake);
+	var l = _elm_lang$core$List$length(model.snake.body);
+	var snake = A3(
+		_user$project$Main$newSnake,
+		A2(_elm_lang$core$List$take, l - 1, model.snake.body),
+		model.snake.direction,
+		model.snake.color);
 	return A2(
 		_elm_lang$core$Platform_Cmd_ops['!'],
 		_elm_lang$core$Native_Utils.update(
 			model,
-			{
-				snake: A2(_elm_lang$core$List$take, l - 1, model.snake)
-			}),
+			{snake: snake}),
 		_elm_lang$core$Native_List.fromArray(
 			[]));
 };
@@ -8984,11 +8993,14 @@ var _user$project$Main$randomPoint = function (model) {
 };
 var _user$project$Main$moveHead = F2(
 	function (model, point) {
+		var snake = A3(
+			_user$project$Main$newSnake,
+			A2(_elm_lang$core$List_ops['::'], point, model.snake.body),
+			model.snake.direction,
+			model.snake.color);
 		return _elm_lang$core$Native_Utils.update(
 			model,
-			{
-				snake: A2(_elm_lang$core$List_ops['::'], point, model.snake)
-			});
+			{snake: snake});
 	});
 var _user$project$Main$toBrowserCoordinates = F2(
 	function (origin, p) {
@@ -9051,7 +9063,7 @@ var _user$project$Main$head = function (snake) {
 	return A2(
 		_elm_lang$core$Maybe$withDefault,
 		_user$project$Main$initialPoint,
-		_elm_lang$core$List$head(snake));
+		_elm_lang$core$List$head(snake.body));
 };
 var _user$project$Main$moveUp = function (model) {
 	var h = _user$project$Main$head(model.snake);
@@ -9074,7 +9086,7 @@ var _user$project$Main$moveRight = function (model) {
 	return A2(_user$project$Main$moveHead, model, point$);
 };
 var _user$project$Main$moveSnake = function (model) {
-	var _p5 = model.direction;
+	var _p5 = model.snake.direction;
 	switch (_p5.ctor) {
 		case 'Up':
 			return _user$project$Main$moveUp(model);
@@ -9106,7 +9118,7 @@ var _user$project$Main$view = function (model) {
 			return _user$project$Main$viewSnakeSegment(
 				A2(_user$project$Main$toBrowserCoordinates, model.origin, p));
 		},
-		model.snake);
+		model.snake.body);
 	var food = _user$project$Main$viewFood(
 		A2(_user$project$Main$toBrowserCoordinates, model.origin, model.food));
 	return A2(
@@ -9128,9 +9140,13 @@ var _user$project$Main$view = function (model) {
 				A2(_elm_lang$core$List_ops['::'], food, snake))
 			]));
 };
-var _user$project$Main$Model = F7(
-	function (a, b, c, d, e, f, g) {
-		return {snake: a, direction: b, food: c, origin: d, maxX: e, maxY: f, seed: g};
+var _user$project$Main$Model = F6(
+	function (a, b, c, d, e, f) {
+		return {snake: a, food: b, origin: c, maxX: d, maxY: e, seed: f};
+	});
+var _user$project$Main$Snake = F3(
+	function (a, b, c) {
+		return {body: a, direction: b, color: c};
 	});
 var _user$project$Main$Point = F2(
 	function (a, b) {
@@ -9200,13 +9216,16 @@ var _user$project$Main$subscriptions = function (model) {
 var _user$project$Main$Right = {ctor: 'Right'};
 var _user$project$Main$Left = {ctor: 'Left'};
 var _user$project$Main$model = {
-	snake: _elm_lang$core$Native_List.fromArray(
-		[
-			_user$project$Main$initialPoint,
-			A2(_user$project$Main$newPoint, 501, 0),
-			A2(_user$project$Main$newPoint, 502, 0)
-		]),
-	direction: _user$project$Main$Left,
+	snake: A3(
+		_user$project$Main$newSnake,
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_user$project$Main$initialPoint,
+				A2(_user$project$Main$newPoint, 501, 0),
+				A2(_user$project$Main$newPoint, 502, 0)
+			]),
+		_user$project$Main$Left,
+		'green'),
 	food: _user$project$Main$initialFoodPoint,
 	origin: {ctor: '_Tuple2', _0: 0, _1: 0},
 	maxX: 100,

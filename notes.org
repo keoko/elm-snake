@@ -29,24 +29,39 @@ CLOSED: [2016-07-14 Thu 21:24]
 CLOSED: [2016-07-14 Thu 20:13]
 ** DONE recalculate coordinates based on window resizing
 CLOSED: [2016-07-15 Fri 07:33]
-** TODO randomize food position
-** TODO log to the console
+** DONE randomize food position
+CLOSED: [2016-07-18 Mon 23:19]
+** DONE log to the console
+CLOSED: [2016-07-18 Mon 23:19]
+Debug.log
 ** DONE CSS positioning
+
+
+
 CLOSED: [2016-07-12 Tue 08:40]
+** TODO eat food if it's near, no exact position
 ** TODO Start, Game, End pages
-** TODO reduce number of parenthesis
+** DONE reduce number of parenthesis
+CLOSED: [2016-07-18 Mon 23:19]
 >>, <<, and other functions.
-** TODO window dimensions
+** DONE window dimensions
+CLOSED: [2016-07-18 Mon 23:19]
 ** TODO Maybe
 ** TODO HowTo handle errors
-** TODO Key model is necessary?
+** DONE Key model is necessary?
+CLOSED: [2016-07-18 Mon 23:21]
 No need to know key codes. This could be hidden in the module.
-** TODO on window resize move the snake to a visible area
+** TODO on window resize move the snake to a visible areao
+
+
+** TODO two snakes, same computer different keys
+** TODO 1 snake with AI snakes
+** TODO multiple snakes from different computers
 
 
 * nice to have
-** best way to draw the snake (SVG, CSS, chars, others)?
-** multiple snakes
+** wall
+** best way to draw the snake (SVG, CSS, chars, others, webgl, d3)?
 ** mouse control
 ** random starting point
 ** elm-format emacs
