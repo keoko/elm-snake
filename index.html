@@ -8946,7 +8946,9 @@ var _elm_lang$window$Window$subMap = F2(
 _elm_lang$core$Native_Platform.effectManagers['Window'] = {pkg: 'elm-lang/window', init: _elm_lang$window$Window$init, onEffects: _elm_lang$window$Window$onEffects, onSelfMsg: _elm_lang$window$Window$onSelfMsg, tag: 'sub', subMap: _elm_lang$window$Window$subMap};
 var _user$project$Main$updateSnake = F2(
 	function (model, snake) {
-		return model;
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{snake: snake});
 	});
 var _user$project$Main$newSnake = F4(
 	function (id, body, direction, color) {
@@ -8958,7 +8960,12 @@ var _user$project$Main$newPoint = F2(
 	});
 var _user$project$Main$changeDirection = F3(
 	function (model, snake, direction) {
-		return model;
+		var snake$ = _elm_lang$core$Native_Utils.update(
+			snake,
+			{direction: direction});
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{snake: snake$});
 	});
 var _user$project$Main$keyDown = F3(
 	function (keyCode, model, snake) {
@@ -8966,16 +8973,16 @@ var _user$project$Main$keyDown = F3(
 	});
 var _user$project$Main$moveTail = F2(
 	function (model, snake) {
-		var l = _elm_lang$core$List$length(model.snake.body);
-		var snake = A4(
-			_user$project$Main$newSnake,
-			snake.id,
-			A2(_elm_lang$core$List$take, l - 1, model.snake.body),
-			model.snake.direction,
-			model.snake.color);
+		var a = 1;
+		var l = _elm_lang$core$List$length(snake.body);
+		var snake$ = _elm_lang$core$Native_Utils.update(
+			snake,
+			{
+				body: A2(_elm_lang$core$List$take, l - 1, snake.body)
+			});
 		return A2(
 			_elm_lang$core$Platform_Cmd_ops['!'],
-			A2(_user$project$Main$updateSnake, model, snake),
+			A2(_user$project$Main$updateSnake, model, snake$),
 			_elm_lang$core$Native_List.fromArray(
 				[]));
 	});
@@ -9003,13 +9010,12 @@ var _user$project$Main$randomPoint = function (model) {
 };
 var _user$project$Main$moveHead = F3(
 	function (model, snake, point) {
-		var snake = A4(
-			_user$project$Main$newSnake,
-			snake.id,
-			A2(_elm_lang$core$List_ops['::'], point, snake.body),
-			snake.direction,
-			snake.color);
-		return A2(_user$project$Main$updateSnake, model, snake);
+		var snake$ = _elm_lang$core$Native_Utils.update(
+			snake,
+			{
+				body: A2(_elm_lang$core$List_ops['::'], point, snake.body)
+			});
+		return A2(_user$project$Main$updateSnake, model, snake$);
 	});
 var _user$project$Main$toBrowserCoordinates = F2(
 	function (origin, p) {
@@ -9148,6 +9154,7 @@ var _user$project$Main$view = function (model) {
 		model.snake.body);
 	var food = _user$project$Main$viewFood(
 		A2(_user$project$Main$toBrowserCoordinates, model.origin, model.food));
+	var a = A2(_elm_lang$core$Debug$log, 'view model', model.snake);
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
@@ -9188,6 +9195,7 @@ var _user$project$Main$NextFood = function (a) {
 };
 var _user$project$Main$eatFood = F2(
 	function (model, snake) {
+		var a = 1;
 		return {
 			ctor: '_Tuple2',
 			_0: model,
@@ -9202,25 +9210,8 @@ var _user$project$Main$checkForFood = F2(
 		return A2(_user$project$Main$canEatFood, model, snake) ? A2(_user$project$Main$eatFood, model, snake) : A2(_user$project$Main$moveTail, model, snake);
 	});
 var _user$project$Main$moveSnakes = function (model) {
-	var _p6 = A3(
-		_elm_lang$core$Basics$flip,
-		_user$project$Main$checkForFood,
-		model.snake,
-		A3(_elm_lang$core$Basics$flip, _user$project$Main$moveSnake, model.snake, model));
-	var model$ = _p6._0;
-	var cmd$ = _p6._1;
-	var _p7 = A3(
-		_elm_lang$core$Basics$flip,
-		_user$project$Main$checkForFood,
-		model.snake2,
-		A3(_elm_lang$core$Basics$flip, _user$project$Main$moveSnake, model.snake2, model$));
-	var model$$ = _p7._0;
-	var cmd$$ = _p7._1;
-	return A2(
-		_elm_lang$core$Platform_Cmd_ops['!'],
-		model$,
-		_elm_lang$core$Native_List.fromArray(
-			[cmd$]));
+	var model$ = A2(_user$project$Main$moveSnake, model, model.snake);
+	return A2(_user$project$Main$checkForFood, model$, model$.snake);
 };
 var _user$project$Main$nextStep = function (model) {
 	return _user$project$Main$moveSnakes(model);
@@ -9233,19 +9224,17 @@ var _user$project$Main$recalculateOriginMsg = function (size) {
 };
 var _user$project$Main$initialOrigin = A3(
 	_elm_lang$core$Task$perform,
-	function (_p8) {
+	function (_p6) {
 		return _user$project$Main$None;
 	},
 	_user$project$Main$recalculateOriginMsg,
 	_elm_lang$window$Window$size);
-var _user$project$Main$KeyDown = F2(
-	function (a, b) {
-		return {ctor: 'KeyDown', _0: a, _1: b};
-	});
-var _user$project$Main$KeyUp = F2(
-	function (a, b) {
-		return {ctor: 'KeyUp', _0: a, _1: b};
-	});
+var _user$project$Main$KeyDown = function (a) {
+	return {ctor: 'KeyDown', _0: a};
+};
+var _user$project$Main$KeyUp = function (a) {
+	return {ctor: 'KeyUp', _0: a};
+};
 var _user$project$Main$TimeUpdate = function (a) {
 	return {ctor: 'TimeUpdate', _0: a};
 };
@@ -9253,10 +9242,8 @@ var _user$project$Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$batch(
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_elm_lang$keyboard$Keyboard$ups(
-				_user$project$Main$KeyUp(model.snake)),
-				_elm_lang$keyboard$Keyboard$downs(
-				_user$project$Main$KeyDown(model.snake)),
+				_elm_lang$keyboard$Keyboard$ups(_user$project$Main$KeyUp),
+				_elm_lang$keyboard$Keyboard$downs(_user$project$Main$KeyDown),
 				_elm_lang$window$Window$resizes(_user$project$Main$recalculateOriginMsg),
 				_elm_lang$animation_frame$AnimationFrame$diffs(
 				function (time) {
@@ -9305,8 +9292,8 @@ var _user$project$Main$Down = {ctor: 'Down'};
 var _user$project$Main$Up = {ctor: 'Up'};
 var _user$project$Main$keyUp = F3(
 	function (keyCode, model, snake) {
-		var _p9 = keyCode;
-		switch (_p9) {
+		var _p7 = keyCode;
+		switch (_p7) {
 			case 38:
 				return A3(_user$project$Main$changeDirection, model, snake, _user$project$Main$Up);
 			case 40:
@@ -9321,8 +9308,8 @@ var _user$project$Main$keyUp = F3(
 	});
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p10 = msg;
-		switch (_p10.ctor) {
+		var _p8 = msg;
+		switch (_p8.ctor) {
 			case 'None':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
@@ -9332,7 +9319,7 @@ var _user$project$Main$update = F2(
 			case 'KeyUp':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					A3(_user$project$Main$keyUp, _p10._1, model, _p10._0),
+					A3(_user$project$Main$keyUp, _p8._0, model, model.snake),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			case 'KeyDown':
@@ -9346,18 +9333,18 @@ var _user$project$Main$update = F2(
 			case 'OriginRecalculate':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					A2(_user$project$Main$recalculateOrigin, model, _p10._0),
+					A2(_user$project$Main$recalculateOrigin, model, _p8._0),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			default:
-				var _p11 = _p10._0;
+				var _p9 = _p8._0;
 				var a = A2(
 					_elm_lang$core$Debug$log,
 					'next food',
-					_elm_lang$core$Basics$toString(_p11));
+					_elm_lang$core$Basics$toString(_p9));
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					A2(_user$project$Main$nextFood, model, _p11),
+					A2(_user$project$Main$nextFood, model, _p9),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 		}

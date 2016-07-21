@@ -30,8 +30,8 @@ type alias Snake =
     }
 
 type Msg = TimeUpdate  Time
-      | KeyUp Snake KeyCode
-      | KeyDown Snake KeyCode
+      | KeyUp KeyCode
+      | KeyDown KeyCode
       | OriginRecalculate Window.Size
       | NextFood Point
       | None
@@ -92,9 +92,9 @@ update msg model =
     case msg of
         None ->
             model ! []
-        KeyUp snake keycode ->
-            (keyUp keycode model snake) ! []
-        KeyDown snake keycode ->
+        KeyUp keycode ->
+            (keyUp keycode model model.snake) ! []
+        KeyDown keycode ->
             model ! []
         TimeUpdate t ->
             nextStep model
@@ -153,6 +153,7 @@ viewSnakeSegment color p = viewBlock p color
 view : Model -> Html Msg
 view model =
     let
+        a = Debug.log "view model" model.snake
         food = viewFood (toBrowserCoordinates model.origin model.food)
         snake = List.map (\p -> p |> toBrowserCoordinates model.origin |> (viewSnakeSegment model.snake.color)) model.snake.body
         snake2 = List.map (\p -> p |> toBrowserCoordinates model.origin |> (viewSnakeSegment model.snake2.color)) model.snake2.body
@@ -166,8 +167,8 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Keyboard.ups (KeyUp model.snake)
-        , Keyboard.downs (KeyDown model.snake)
+        [ Keyboard.ups KeyUp
+        , Keyboard.downs KeyDown
         , Window.resizes recalculateOriginMsg
         , AnimationFrame.diffs (\time ->
                                     if ((round time) `rem` 1 == 0) then
@@ -180,9 +181,10 @@ subscriptions model =
 moveHead : Model -> Snake -> Point -> Model
 moveHead model snake point =
     let
-        snake = newSnake snake.id (point :: snake.body) snake.direction snake.color
+        snake' = { snake | body = (point :: snake.body) }
+        --a = Debug.log "moveHead" snake'
     in
-        updateSnake model snake
+        updateSnake model snake'
 
 head : Snake -> Point
 head snake =
@@ -252,17 +254,14 @@ nextStep model =
 moveSnakes : Model -> (Model, Cmd Msg)
 moveSnakes model =
     let
-        (model', cmd' ) =
-            model
-                |> flip moveSnake model.snake
-                |> flip checkForFood model.snake
+        model' = moveSnake model model.snake
 
-        (model'', cmd'') =
-             model'
-                 |> flip moveSnake model.snake2
-                 |> flip checkForFood model.snake2
+        -- (model'', cmd'') =
+        --      model'
+        --          |> flip moveSnake model.snake2
+        --          |> flip checkForFood model.snake2
     in
-        model' ! [cmd']
+        checkForFood model' model'.snake
 
 checkForFood : Model -> Snake -> (Model, Cmd Msg)
 checkForFood model snake =
@@ -282,6 +281,9 @@ randomPoint model =
 
 eatFood : Model -> Snake -> (Model, Cmd Msg)
 eatFood model snake =
+    let
+        a = 1 -- Debug.log "eatFood" model
+    in
     (model, generate NextFood (randomPoint model) )
 
 nextFood : Model -> Point -> Model
@@ -300,10 +302,11 @@ growSnake model =
 moveTail : Model -> Snake -> (Model, Cmd Msg)
 moveTail model snake =
     let
-        l = List.length model.snake.body
-        snake = newSnake snake.id (List.take (l-1) model.snake.body) model.snake.direction model.snake.color
+        l = List.length snake.body
+        snake' = { snake | body = (List.take (l-1) snake.body) }
+        a =  1 --Debug.log "moveTail" snake'
     in
-        (updateSnake model snake) ! []
+        (updateSnake model snake') ! []
 
 
 keyUp : KeyCode -> Model -> Snake -> Model
@@ -326,11 +329,10 @@ keyDown keyCode model snake =
 
 changeDirection : Model -> Snake -> Direction -> Model
 changeDirection model snake direction =
-    model
-    -- let
-    --     snake' = { snake | direction = direction }
-    -- in
-    --     { model | snake = snake' }
+    let
+        snake' = { snake | direction = direction }
+    in
+        { model | snake = snake' }
 
 
 newPoint : Int -> Int -> Point
@@ -350,4 +352,4 @@ newSnake id body direction color =
 
 updateSnake : Model -> Snake -> Model
 updateSnake model snake =
-    model
+    { model | snake = snake }

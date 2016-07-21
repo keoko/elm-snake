@@ -57,6 +57,7 @@ No need to know key codes. This could be hidden in the module.
 ** TODO two snakes, same computer different keys
 ** TODO 1 snake with AI snakes
 ** TODO multiple snakes from different computers
+** TODO handle collisions
 
 
 * nice to have
