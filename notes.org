@@ -46,21 +46,21 @@ CLOSED: [2016-07-18 Mon 23:19]
 >>, <<, and other functions.
 ** DONE window dimensions
 CLOSED: [2016-07-18 Mon 23:19]
-** TODO Maybe
+** DONE Maybe
+CLOSED: [2016-07-21 Thu 19:57]
 ** TODO HowTo handle errors
 ** DONE Key model is necessary?
 CLOSED: [2016-07-18 Mon 23:21]
 No need to know key codes. This could be hidden in the module.
-** TODO on window resize move the snake to a visible areao
-
 
 ** TODO two snakes, same computer different keys
 ** TODO 1 snake with AI snakes
 ** TODO multiple snakes from different computers
-** TODO handle collisions
 
 
 * nice to have
+** handle collisions
+** on window resize move the snake to a visible areao
 ** wall
 ** best way to draw the snake (SVG, CSS, chars, others, webgl, d3)?
 ** mouse control

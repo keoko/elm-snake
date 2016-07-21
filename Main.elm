@@ -93,7 +93,7 @@ update msg model =
         None ->
             model ! []
         KeyUp keycode ->
-            (keyUp keycode model model.snake) ! []
+            (keyUp keycode model) ! []
         KeyDown keycode ->
             model ! []
         TimeUpdate t ->
@@ -153,7 +153,7 @@ viewSnakeSegment color p = viewBlock p color
 view : Model -> Html Msg
 view model =
     let
-        a = Debug.log "view model" model.snake
+--        a = Debug.log "view model" model.snake
         food = viewFood (toBrowserCoordinates model.origin model.food)
         snake = List.map (\p -> p |> toBrowserCoordinates model.origin |> (viewSnakeSegment model.snake.color)) model.snake.body
         snake2 = List.map (\p -> p |> toBrowserCoordinates model.origin |> (viewSnakeSegment model.snake2.color)) model.snake2.body
@@ -311,17 +311,25 @@ moveTail model snake =
         (updateSnake model snake') ! []
 
 
-keyUp : KeyCode -> Model -> Snake -> Model
-keyUp keyCode model snake =
+keyUp : KeyCode -> Model -> Model
+keyUp keyCode model =
     case keyCode of
         38 ->
-            changeDirection model snake Up
+            changeDirection model model.snake Up
         40 ->
-            changeDirection model snake Down
+            changeDirection model model.snake Down
         37 ->
-            changeDirection model snake Left
+            changeDirection model model.snake Left
         39 ->
-            changeDirection model snake Right
+            changeDirection model model.snake Right
+        87 ->
+            changeDirection model model.snake2 Up
+        83 ->
+            changeDirection model model.snake2 Down
+        65 ->
+            changeDirection model model.snake2 Left
+        68 ->
+            changeDirection model model.snake2 Right
         _ ->
             model
 
@@ -334,7 +342,10 @@ changeDirection model snake direction =
     let
         snake' = { snake | direction = direction }
     in
-        { model | snake = snake' }
+        if snake.id == "foo" then
+            { model | snake = snake' }
+        else
+            { model | snake2 = snake' }
 
 
 newPoint : Int -> Int -> Point
@@ -350,7 +361,6 @@ newSnake id body direction color =
     , direction = direction
     , color = color
     }
-
 
 updateSnake : Model -> Snake -> Model
 updateSnake model snake =

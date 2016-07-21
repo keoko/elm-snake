@@ -8965,9 +8965,11 @@ var _user$project$Main$changeDirection = F3(
 		var snake$ = _elm_lang$core$Native_Utils.update(
 			snake,
 			{direction: direction});
-		return _elm_lang$core$Native_Utils.update(
+		return _elm_lang$core$Native_Utils.eq(snake.id, 'foo') ? _elm_lang$core$Native_Utils.update(
 			model,
-			{snake: snake$});
+			{snake: snake$}) : _elm_lang$core$Native_Utils.update(
+			model,
+			{snake2: snake$});
 	});
 var _user$project$Main$keyDown = F3(
 	function (keyCode, model, snake) {
@@ -9156,7 +9158,6 @@ var _user$project$Main$view = function (model) {
 		model.snake.body);
 	var food = _user$project$Main$viewFood(
 		A2(_user$project$Main$toBrowserCoordinates, model.origin, model.food));
-	var a = A2(_elm_lang$core$Debug$log, 'view model', model.snake);
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
@@ -9303,18 +9304,26 @@ var _user$project$Main$model = {
 var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Main$model, _1: _user$project$Main$initialOrigin};
 var _user$project$Main$Down = {ctor: 'Down'};
 var _user$project$Main$Up = {ctor: 'Up'};
-var _user$project$Main$keyUp = F3(
-	function (keyCode, model, snake) {
+var _user$project$Main$keyUp = F2(
+	function (keyCode, model) {
 		var _p9 = keyCode;
 		switch (_p9) {
 			case 38:
-				return A3(_user$project$Main$changeDirection, model, snake, _user$project$Main$Up);
+				return A3(_user$project$Main$changeDirection, model, model.snake, _user$project$Main$Up);
 			case 40:
-				return A3(_user$project$Main$changeDirection, model, snake, _user$project$Main$Down);
+				return A3(_user$project$Main$changeDirection, model, model.snake, _user$project$Main$Down);
 			case 37:
-				return A3(_user$project$Main$changeDirection, model, snake, _user$project$Main$Left);
+				return A3(_user$project$Main$changeDirection, model, model.snake, _user$project$Main$Left);
 			case 39:
-				return A3(_user$project$Main$changeDirection, model, snake, _user$project$Main$Right);
+				return A3(_user$project$Main$changeDirection, model, model.snake, _user$project$Main$Right);
+			case 87:
+				return A3(_user$project$Main$changeDirection, model, model.snake2, _user$project$Main$Up);
+			case 83:
+				return A3(_user$project$Main$changeDirection, model, model.snake2, _user$project$Main$Down);
+			case 65:
+				return A3(_user$project$Main$changeDirection, model, model.snake2, _user$project$Main$Left);
+			case 68:
+				return A3(_user$project$Main$changeDirection, model, model.snake2, _user$project$Main$Right);
 			default:
 				return model;
 		}
@@ -9332,7 +9341,7 @@ var _user$project$Main$update = F2(
 			case 'KeyUp':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					A3(_user$project$Main$keyUp, _p10._0, model, model.snake),
+					A2(_user$project$Main$keyUp, _p10._0, model),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			case 'KeyDown':
