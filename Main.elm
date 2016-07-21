@@ -263,7 +263,7 @@ moveSnakes model =
         --          |> flip moveSnake model.snake2
         --          |> flip checkForFood model.snake2
     in
-        model'' ! [cmd]
+        model'''' ! [cmd, cmd']
 
 checkForFood : Model -> Snake -> (Model, Cmd Msg)
 checkForFood model snake =
@@ -354,4 +354,7 @@ newSnake id body direction color =
 
 updateSnake : Model -> Snake -> Model
 updateSnake model snake =
-    { model | snake = snake }
+    if snake.id == "foo" then
+        { model | snake = snake }
+    else
+        { model | snake2 = snake }

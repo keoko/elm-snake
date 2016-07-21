@@ -8946,9 +8946,11 @@ var _elm_lang$window$Window$subMap = F2(
 _elm_lang$core$Native_Platform.effectManagers['Window'] = {pkg: 'elm-lang/window', init: _elm_lang$window$Window$init, onEffects: _elm_lang$window$Window$onEffects, onSelfMsg: _elm_lang$window$Window$onSelfMsg, tag: 'sub', subMap: _elm_lang$window$Window$subMap};
 var _user$project$Main$updateSnake = F2(
 	function (model, snake) {
-		return _elm_lang$core$Native_Utils.update(
+		return _elm_lang$core$Native_Utils.eq(snake.id, 'foo') ? _elm_lang$core$Native_Utils.update(
 			model,
-			{snake: snake});
+			{snake: snake}) : _elm_lang$core$Native_Utils.update(
+			model,
+			{snake2: snake});
 	});
 var _user$project$Main$newSnake = F4(
 	function (id, body, direction, color) {
@@ -9220,9 +9222,9 @@ var _user$project$Main$moveSnakes = function (model) {
 	var cmd$ = _p7._1;
 	return A2(
 		_elm_lang$core$Platform_Cmd_ops['!'],
-		model$$,
+		model$$$$,
 		_elm_lang$core$Native_List.fromArray(
-			[cmd]));
+			[cmd, cmd$]));
 };
 var _user$project$Main$nextStep = function (model) {
 	return _user$project$Main$moveSnakes(model);
