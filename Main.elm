@@ -30,8 +30,8 @@ type alias Snake =
     }
 
 type Msg = TimeUpdate  Time
-      | KeyUp KeyCode
-      | KeyDown KeyCode
+      | KeyUp Snake KeyCode
+      | KeyDown Snake KeyCode
       | OriginRecalculate Window.Size
       | NextFood Point
       | None
@@ -92,9 +92,9 @@ update msg model =
     case msg of
         None ->
             model ! []
-        KeyUp keycode ->
-            (keyUp keycode model model.snake) ! []
-        KeyDown keycode ->
+        KeyUp snake keycode ->
+            (keyUp keycode model snake) ! []
+        KeyDown snake keycode ->
             model ! []
         TimeUpdate t ->
             nextStep model
@@ -166,8 +166,8 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Keyboard.ups KeyUp
-        , Keyboard.downs KeyDown
+        [ Keyboard.ups (KeyUp model.snake)
+        , Keyboard.downs (KeyDown model.snake)
         , Window.resizes recalculateOriginMsg
         , AnimationFrame.diffs (\time ->
                                     if ((round time) `rem` 1 == 0) then

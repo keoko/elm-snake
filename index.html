@@ -9238,12 +9238,14 @@ var _user$project$Main$initialOrigin = A3(
 	},
 	_user$project$Main$recalculateOriginMsg,
 	_elm_lang$window$Window$size);
-var _user$project$Main$KeyDown = function (a) {
-	return {ctor: 'KeyDown', _0: a};
-};
-var _user$project$Main$KeyUp = function (a) {
-	return {ctor: 'KeyUp', _0: a};
-};
+var _user$project$Main$KeyDown = F2(
+	function (a, b) {
+		return {ctor: 'KeyDown', _0: a, _1: b};
+	});
+var _user$project$Main$KeyUp = F2(
+	function (a, b) {
+		return {ctor: 'KeyUp', _0: a, _1: b};
+	});
 var _user$project$Main$TimeUpdate = function (a) {
 	return {ctor: 'TimeUpdate', _0: a};
 };
@@ -9251,8 +9253,10 @@ var _user$project$Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$batch(
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_elm_lang$keyboard$Keyboard$ups(_user$project$Main$KeyUp),
-				_elm_lang$keyboard$Keyboard$downs(_user$project$Main$KeyDown),
+				_elm_lang$keyboard$Keyboard$ups(
+				_user$project$Main$KeyUp(model.snake)),
+				_elm_lang$keyboard$Keyboard$downs(
+				_user$project$Main$KeyDown(model.snake)),
 				_elm_lang$window$Window$resizes(_user$project$Main$recalculateOriginMsg),
 				_elm_lang$animation_frame$AnimationFrame$diffs(
 				function (time) {
@@ -9328,7 +9332,7 @@ var _user$project$Main$update = F2(
 			case 'KeyUp':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					A3(_user$project$Main$keyUp, _p10._0, model, model.snake),
+					A3(_user$project$Main$keyUp, _p10._1, model, _p10._0),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			case 'KeyDown':
