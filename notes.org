@@ -90,3 +90,5 @@ https://github.com/elm-lang/elm-repl/issues/68
 
 ** blank page after installing AnimationFrame package
 just removed the elm-stuff directory and it worked. No clue what happened.
+** missing whitespace. where?
+I need whitespace, but got stuck on what looks like a new declaration. You are ...

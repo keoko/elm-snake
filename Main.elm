@@ -14,6 +14,7 @@ import Debug exposing (log)
 
 type alias Model =
     { snake : Snake
+    , snake2 : Snake
     , food : Point
     , origin : (Int, Int)
     , maxX : Int
@@ -22,7 +23,8 @@ type alias Model =
     }
 
 type alias Snake =
-    { body : List Point
+    { id : String
+    , body : List Point
     , direction : Direction
     , color : String
     }
@@ -64,7 +66,8 @@ initialFoodPoint = newPoint 200 0
 
 model : Model
 model =
-    { snake = newSnake [initialPoint, (newPoint 501 0), (newPoint 502 0)] Left "green"
+    { snake = newSnake "foo" [initialPoint, (newPoint 501 0), (newPoint 502 0)] Left "green"
+    , snake2 = newSnake "bar" [(newPoint 300 0), (newPoint 301 0), (newPoint 302 0)] Left "blue"
     , food = initialFoodPoint
     , origin = (0, 0)
     , maxX = 100
@@ -90,8 +93,8 @@ update msg model =
         None ->
             model ! []
         KeyUp keycode ->
-            (keyUp keycode model) ! []
-        KeyDown keyCode ->
+            (keyUp keycode model model.snake) ! []
+        KeyDown keycode ->
             model ! []
         TimeUpdate t ->
             nextStep model
@@ -144,19 +147,20 @@ viewBlock (left, top) color =
 viewFood : (Int, Int) -> Html Msg
 viewFood p = viewBlock p foodColor
 
-viewSnakeSegment : (Int, Int) -> Html Msg
-viewSnakeSegment p = viewBlock p snakeColor
+viewSnakeSegment : String -> (Int, Int) -> Html Msg
+viewSnakeSegment color p = viewBlock p color
 
 view : Model -> Html Msg
 view model =
     let
         food = viewFood (toBrowserCoordinates model.origin model.food)
-        snake = List.map (\p -> p |> toBrowserCoordinates model.origin |> viewSnakeSegment) model.snake.body
+        snake = List.map (\p -> p |> toBrowserCoordinates model.origin |> (viewSnakeSegment model.snake.color)) model.snake.body
+        snake2 = List.map (\p -> p |> toBrowserCoordinates model.origin |> (viewSnakeSegment model.snake2.color)) model.snake2.body
     in
         div []
         [
          text <| (toString model.food) ++ (toString <| head model.snake)
-         ,div [] (food :: snake)
+         ,div [] (food :: (snake ++ snake2))
         ]
 
 subscriptions : Model -> Sub Msg
@@ -173,88 +177,99 @@ subscriptions model =
         ]
 
 
-moveHead : Model -> Point -> Model
-moveHead model point =
+moveHead : Model -> Snake -> Point -> Model
+moveHead model snake point =
     let
-        snake = newSnake (point :: model.snake.body) model.snake.direction model.snake.color
+        snake = newSnake snake.id (point :: snake.body) snake.direction snake.color
     in
-        { model | snake = snake }
-
+        updateSnake model snake
 
 head : Snake -> Point
 head snake =
     Maybe.withDefault initialPoint (List.head snake.body)
 
-moveUp : Model -> Model
-moveUp model =
+moveUp : Model -> Snake -> Model
+moveUp model snake =
     let
-        h = head model.snake
+        h = head snake
         point' = if (h.y + 1 > model.maxY) then
                      newPoint h.x (0 - model.maxY)
                  else
                      newPoint h.x (h.y + 1)
     in
-        moveHead model point'
+        moveHead model snake point'
 
-moveDown : Model -> Model
-moveDown model =
+moveDown : Model -> Snake -> Model
+moveDown model snake =
     let
-        h = head model.snake
+        h = head snake
         point' = if (h.y - 1 < (0 - model.maxY)) then
                      newPoint h.x model.maxY
                  else
                      newPoint h.x (h.y - 1)
     in
-        moveHead model point'
+        moveHead model snake point'
 
-moveLeft : Model -> Model
-moveLeft model =
+moveLeft : Model -> Snake -> Model
+moveLeft model snake =
     let
-        h = head model.snake
+        h = head snake
         point' = if (h.x - 1 < (0 - model.maxX)) then
                      newPoint model.maxX h.y
                  else
                      newPoint (h.x - 1) h.y
     in
-        moveHead model point'
+        moveHead model snake point'
 
-moveRight : Model -> Model
-moveRight model =
+moveRight : Model -> Snake -> Model
+moveRight model snake =
     let
-        h = head model.snake
+        h = head snake
         point' = if (h.x + 1 > model.maxX) then
                      newPoint (0 - model.maxX) h.y
                  else
                      newPoint (h.x + 1) h.y
     in
-        moveHead model point'
+        moveHead model snake point'
 
 
-moveSnake : Model -> Model
-moveSnake model =
-    case model.snake.direction of
+moveSnake : Model -> Snake -> Model
+moveSnake model snake =
+    case snake.direction of
         Up ->
-            moveUp model
+            moveUp model snake
         Down ->
-            moveDown model
+            moveDown model snake
         Left ->
-            moveLeft model
+            moveLeft model snake
         Right ->
-            moveRight model
+            moveRight model snake
 
 nextStep : Model -> (Model, Cmd Msg)
 nextStep model =
-    model
-        |> moveSnake
-        |> checkForFood
+    moveSnakes model
 
+moveSnakes : Model -> (Model, Cmd Msg)
+moveSnakes model =
+    let
+        (model', cmd' ) =
+            model
+                |> flip moveSnake model.snake
+                |> flip checkForFood model.snake
 
-checkForFood : Model -> (Model, Cmd Msg)
-checkForFood model =
-    if canEatFood model then
-        eatFood model
+        (model'', cmd'') =
+             model'
+                 |> flip moveSnake model.snake2
+                 |> flip checkForFood model.snake2
+    in
+        model' ! [cmd']
+
+checkForFood : Model -> Snake -> (Model, Cmd Msg)
+checkForFood model snake =
+    if canEatFood model snake then
+        eatFood model snake
     else
-        moveTail model
+        moveTail model snake
 
 
 randomPoint : Model -> Generator Point
@@ -265,8 +280,8 @@ randomPoint model =
     in
         Random.map (\(x,y) -> newPoint x y) r
 
-eatFood : Model -> (Model, Cmd Msg)
-eatFood model =
+eatFood : Model -> Snake -> (Model, Cmd Msg)
+eatFood model snake =
     (model, generate NextFood (randomPoint model) )
 
 nextFood : Model -> Point -> Model
@@ -274,44 +289,48 @@ nextFood model point =
     { model | food = point }
 
 
-canEatFood : Model -> Bool
-canEatFood model =
-    (head model.snake) == model.food
+canEatFood : Model -> Snake -> Bool
+canEatFood model snake =
+    (head snake) == model.food
 
 growSnake : Model -> Model
 growSnake model =
     model
 
-moveTail : Model -> (Model, Cmd Msg)
-moveTail model =
+moveTail : Model -> Snake -> (Model, Cmd Msg)
+moveTail model snake =
     let
         l = List.length model.snake.body
-        snake = newSnake (List.take (l-1) model.snake.body) model.snake.direction model.snake.color
+        snake = newSnake snake.id (List.take (l-1) model.snake.body) model.snake.direction model.snake.color
     in
-        { model | snake = snake } ! []
+        (updateSnake model snake) ! []
 
 
-keyUp : KeyCode -> Model -> Model
-keyUp keyCode model =
+keyUp : KeyCode -> Model -> Snake -> Model
+keyUp keyCode model snake =
     case keyCode of
         38 ->
-            changeDirection model Up
+            changeDirection model snake Up
         40 ->
-            changeDirection model Down
+            changeDirection model snake Down
         37 ->
-            changeDirection model Left
+            changeDirection model snake Left
         39 ->
-            changeDirection model Right
+            changeDirection model snake Right
         _ ->
             model
 
-keyDown : KeyCode -> Model -> Model
-keyDown keyCode model =
+keyDown : KeyCode -> Model -> Snake -> Model
+keyDown keyCode model snake =
     model
 
-changeDirection : Model -> Direction -> Model
-changeDirection model  direction =
-    { model | snake = newSnake model.snake.body direction model.snake.color }
+changeDirection : Model -> Snake -> Direction -> Model
+changeDirection model snake direction =
+    model
+    -- let
+    --     snake' = { snake | direction = direction }
+    -- in
+    --     { model | snake = snake' }
 
 
 newPoint : Int -> Int -> Point
@@ -320,9 +339,15 @@ newPoint x y =
     , y = y
     }
 
-newSnake : List Point -> Direction -> String -> Snake
-newSnake body direction color =
-    { body = body
+newSnake : String -> List Point -> Direction -> String -> Snake
+newSnake id body direction color =
+    { id = id
+    , body = body
     , direction = direction
     , color = color
     }
+
+
+updateSnake : Model -> Snake -> Model
+updateSnake model snake =
+    model
