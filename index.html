@@ -9211,7 +9211,18 @@ var _user$project$Main$checkForFood = F2(
 	});
 var _user$project$Main$moveSnakes = function (model) {
 	var model$ = A2(_user$project$Main$moveSnake, model, model.snake);
-	return A2(_user$project$Main$checkForFood, model$, model$.snake);
+	var _p6 = A2(_user$project$Main$checkForFood, model$, model$.snake);
+	var model$$ = _p6._0;
+	var cmd = _p6._1;
+	var model$$$ = A2(_user$project$Main$moveSnake, model$$, model$$.snake2);
+	var _p7 = A2(_user$project$Main$checkForFood, model$$$, model$$$.snake2);
+	var model$$$$ = _p7._0;
+	var cmd$ = _p7._1;
+	return A2(
+		_elm_lang$core$Platform_Cmd_ops['!'],
+		model$$,
+		_elm_lang$core$Native_List.fromArray(
+			[cmd]));
 };
 var _user$project$Main$nextStep = function (model) {
 	return _user$project$Main$moveSnakes(model);
@@ -9224,7 +9235,7 @@ var _user$project$Main$recalculateOriginMsg = function (size) {
 };
 var _user$project$Main$initialOrigin = A3(
 	_elm_lang$core$Task$perform,
-	function (_p6) {
+	function (_p8) {
 		return _user$project$Main$None;
 	},
 	_user$project$Main$recalculateOriginMsg,
@@ -9292,8 +9303,8 @@ var _user$project$Main$Down = {ctor: 'Down'};
 var _user$project$Main$Up = {ctor: 'Up'};
 var _user$project$Main$keyUp = F3(
 	function (keyCode, model, snake) {
-		var _p7 = keyCode;
-		switch (_p7) {
+		var _p9 = keyCode;
+		switch (_p9) {
 			case 38:
 				return A3(_user$project$Main$changeDirection, model, snake, _user$project$Main$Up);
 			case 40:
@@ -9308,8 +9319,8 @@ var _user$project$Main$keyUp = F3(
 	});
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p8 = msg;
-		switch (_p8.ctor) {
+		var _p10 = msg;
+		switch (_p10.ctor) {
 			case 'None':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
@@ -9319,7 +9330,7 @@ var _user$project$Main$update = F2(
 			case 'KeyUp':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					A3(_user$project$Main$keyUp, _p8._0, model, model.snake),
+					A3(_user$project$Main$keyUp, _p10._0, model, model.snake),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			case 'KeyDown':
@@ -9333,18 +9344,18 @@ var _user$project$Main$update = F2(
 			case 'OriginRecalculate':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					A2(_user$project$Main$recalculateOrigin, model, _p8._0),
+					A2(_user$project$Main$recalculateOrigin, model, _p10._0),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			default:
-				var _p9 = _p8._0;
+				var _p11 = _p10._0;
 				var a = A2(
 					_elm_lang$core$Debug$log,
 					'next food',
-					_elm_lang$core$Basics$toString(_p9));
+					_elm_lang$core$Basics$toString(_p11));
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					A2(_user$project$Main$nextFood, model, _p9),
+					A2(_user$project$Main$nextFood, model, _p11),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 		}

@@ -255,13 +255,15 @@ moveSnakes : Model -> (Model, Cmd Msg)
 moveSnakes model =
     let
         model' = moveSnake model model.snake
-
+        (model'', cmd) = checkForFood model' model'.snake
+        model''' = moveSnake model'' model''.snake2
+        (model'''', cmd') = checkForFood model''' model'''.snake2
         -- (model'', cmd'') =
         --      model'
         --          |> flip moveSnake model.snake2
         --          |> flip checkForFood model.snake2
     in
-        checkForFood model' model'.snake
+        model'' ! [cmd]
 
 checkForFood : Model -> Snake -> (Model, Cmd Msg)
 checkForFood model snake =
