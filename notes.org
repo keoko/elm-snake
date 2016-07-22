@@ -39,7 +39,6 @@ Debug.log
 
 
 CLOSED: [2016-07-12 Tue 08:40]
-** TODO eat food if it's near, no exact position
 ** TODO Start, Game, End pages
 ** TODO scoring
 ** DONE reduce number of parenthesis
@@ -54,9 +53,12 @@ CLOSED: [2016-07-21 Thu 19:57]
 CLOSED: [2016-07-18 Mon 23:21]
 No need to know key codes. This could be hidden in the module.
 
-** TODO two snakes, same computer different keys
+** DONE two snakes, same computer different keys
+CLOSED: [2016-07-22 Fri 22:53]
+** TODO multiple snakes (random movements)
 ** TODO 1 snake with AI snakes
 ** TODO multiple snakes from different computers
+** TODO eat food if it's near, no exact position
 
 
 * nice to have

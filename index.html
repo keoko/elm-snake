@@ -10128,11 +10128,18 @@ var _fbonetti$elm_phoenix_socket$Phoenix_Socket$listen = F2(
 	});
 var _user$project$Main$updateSnake = F2(
 	function (model, snake) {
-		return _elm_lang$core$Native_Utils.eq(snake.id, 'foo') ? _elm_lang$core$Native_Utils.update(
+		return _elm_lang$core$Native_Utils.eq(snake.id, model.snake.id) ? _elm_lang$core$Native_Utils.update(
 			model,
 			{snake: snake}) : _elm_lang$core$Native_Utils.update(
 			model,
-			{snake2: snake});
+			{
+				snakes: A2(
+					_elm_lang$core$List$map,
+					function (s) {
+						return _elm_lang$core$Native_Utils.eq(s.id, snake.id) ? snake : s;
+					},
+					model.snakes)
+			});
 	});
 var _user$project$Main$newSnake = F4(
 	function (id, body, direction, color) {
@@ -10147,11 +10154,9 @@ var _user$project$Main$changeDirection = F3(
 		var snake$ = _elm_lang$core$Native_Utils.update(
 			snake,
 			{direction: direction});
-		return _elm_lang$core$Native_Utils.eq(snake.id, 'foo') ? _elm_lang$core$Native_Utils.update(
+		return _elm_lang$core$Native_Utils.eq(snake.id, model.snake.id) ? _elm_lang$core$Native_Utils.update(
 			model,
-			{snake: snake$}) : _elm_lang$core$Native_Utils.update(
-			model,
-			{snake2: snake$});
+			{snake: snake$}) : A2(_user$project$Main$updateSnake, model, snake$);
 	});
 var _user$project$Main$keyDown = F3(
 	function (keyCode, model, snake) {
@@ -10250,6 +10255,18 @@ var _user$project$Main$viewSnakeSegment = F2(
 	function (color, p) {
 		return A2(_user$project$Main$viewBlock, p, color);
 	});
+var _user$project$Main$viewSnake = F2(
+	function (model, snake) {
+		return A2(
+			_elm_lang$core$List$map,
+			function (p) {
+				return A2(
+					_user$project$Main$viewSnakeSegment,
+					snake.color,
+					A2(_user$project$Main$toBrowserCoordinates, model.origin, p));
+			},
+			snake.body);
+	});
 var _user$project$Main$recalculateOrigin = F2(
 	function (model, size) {
 		var top = (size.height / 2) | 0;
@@ -10324,7 +10341,7 @@ var _user$project$Main$socketServer = 'ws://localhost:4000/socket/websocket';
 var _user$project$Main$host = 'http://localhost:4000';
 var _user$project$Main$Model = F8(
 	function (a, b, c, d, e, f, g, h) {
-		return {snake: a, snake2: b, food: c, origin: d, maxX: e, maxY: f, seed: g, phxSocket: h};
+		return {snake: a, snakes: b, food: c, origin: d, maxX: e, maxY: f, seed: g, phxSocket: h};
 	});
 var _user$project$Main$Snake = F4(
 	function (a, b, c, d) {
@@ -10347,24 +10364,11 @@ var _user$project$Main$initPhxSocket = A4(
 		_fbonetti$elm_phoenix_socket$Phoenix_Socket$init(_user$project$Main$socketServer)));
 var _user$project$Main$JoinChannel = {ctor: 'JoinChannel'};
 var _user$project$Main$view = function (model) {
-	var snake2 = A2(
-		_elm_lang$core$List$map,
-		function (p) {
-			return A2(
-				_user$project$Main$viewSnakeSegment,
-				model.snake2.color,
-				A2(_user$project$Main$toBrowserCoordinates, model.origin, p));
-		},
-		model.snake2.body);
-	var snake = A2(
-		_elm_lang$core$List$map,
-		function (p) {
-			return A2(
-				_user$project$Main$viewSnakeSegment,
-				model.snake.color,
-				A2(_user$project$Main$toBrowserCoordinates, model.origin, p));
-		},
-		model.snake.body);
+	var snakes = A2(
+		_elm_lang$core$List$concatMap,
+		_user$project$Main$viewSnake(model),
+		model.snakes);
+	var snake = A2(_user$project$Main$viewSnake, model, model.snake);
 	var food = _user$project$Main$viewFood(
 		A2(_user$project$Main$toBrowserCoordinates, model.origin, model.food));
 	return A2(
@@ -10396,7 +10400,7 @@ var _user$project$Main$view = function (model) {
 				A2(
 					_elm_lang$core$List_ops['::'],
 					food,
-					A2(_elm_lang$core$Basics_ops['++'], snake, snake2)))
+					A2(_elm_lang$core$Basics_ops['++'], snake, snakes)))
 			]));
 };
 var _user$project$Main$PhoenixMsg = function (a) {
@@ -10426,15 +10430,11 @@ var _user$project$Main$moveSnakes = function (model) {
 	var _p6 = A2(_user$project$Main$checkForFood, model$, model$.snake);
 	var model$$ = _p6._0;
 	var cmd = _p6._1;
-	var model$$$ = A2(_user$project$Main$moveSnake, model$$, model$$.snake2);
-	var _p7 = A2(_user$project$Main$checkForFood, model$$$, model$$$.snake2);
-	var model$$$$ = _p7._0;
-	var cmd$ = _p7._1;
 	return A2(
 		_elm_lang$core$Platform_Cmd_ops['!'],
-		model$$$$,
+		model$$,
 		_elm_lang$core$Native_List.fromArray(
-			[cmd, cmd$]));
+			[cmd]));
 };
 var _user$project$Main$nextStep = function (model) {
 	return _user$project$Main$moveSnakes(model);
@@ -10447,7 +10447,7 @@ var _user$project$Main$recalculateOriginMsg = function (size) {
 };
 var _user$project$Main$initialOrigin = A3(
 	_elm_lang$core$Task$perform,
-	function (_p8) {
+	function (_p7) {
 		return _user$project$Main$None;
 	},
 	_user$project$Main$recalculateOriginMsg,
@@ -10482,6 +10482,8 @@ var _user$project$Main$subscriptions = function (model) {
 };
 var _user$project$Main$Right = {ctor: 'Right'};
 var _user$project$Main$Left = {ctor: 'Left'};
+var _user$project$Main$Down = {ctor: 'Down'};
+var _user$project$Main$Up = {ctor: 'Up'};
 var _user$project$Main$model = {
 	snake: A4(
 		_user$project$Main$newSnake,
@@ -10494,17 +10496,42 @@ var _user$project$Main$model = {
 			]),
 		_user$project$Main$Left,
 		'green'),
-	snake2: A4(
-		_user$project$Main$newSnake,
-		'bar',
-		_elm_lang$core$Native_List.fromArray(
-			[
-				A2(_user$project$Main$newPoint, 300, 0),
-				A2(_user$project$Main$newPoint, 301, 0),
-				A2(_user$project$Main$newPoint, 302, 0)
-			]),
-		_user$project$Main$Left,
-		'blue'),
+	snakes: _elm_lang$core$Native_List.fromArray(
+		[
+			A4(
+			_user$project$Main$newSnake,
+			'bar',
+			_elm_lang$core$Native_List.fromArray(
+				[
+					A2(_user$project$Main$newPoint, 300, 0),
+					A2(_user$project$Main$newPoint, 301, 0),
+					A2(_user$project$Main$newPoint, 302, 0)
+				]),
+			_user$project$Main$Left,
+			'blue'),
+			A4(
+			_user$project$Main$newSnake,
+			'baz',
+			_elm_lang$core$Native_List.fromArray(
+				[
+					A2(_user$project$Main$newPoint, 300, 2),
+					A2(_user$project$Main$newPoint, 301, 2),
+					A2(_user$project$Main$newPoint, 302, 2)
+				]),
+			_user$project$Main$Right,
+			'orange'),
+			A4(
+			_user$project$Main$newSnake,
+			'quux',
+			_elm_lang$core$Native_List.fromArray(
+				[
+					A2(_user$project$Main$newPoint, 300, 5),
+					A2(_user$project$Main$newPoint, 301, 5),
+					A2(_user$project$Main$newPoint, 302, 5)
+				]),
+			_user$project$Main$Up,
+			'violet')
+		]),
 	food: _user$project$Main$initialFoodPoint,
 	origin: {ctor: '_Tuple2', _0: 0, _1: 0},
 	maxX: 100,
@@ -10513,12 +10540,10 @@ var _user$project$Main$model = {
 	phxSocket: _user$project$Main$initPhxSocket
 };
 var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Main$model, _1: _user$project$Main$initialOrigin};
-var _user$project$Main$Down = {ctor: 'Down'};
-var _user$project$Main$Up = {ctor: 'Up'};
 var _user$project$Main$keyUp = F2(
 	function (keyCode, model) {
-		var _p9 = keyCode;
-		switch (_p9) {
+		var _p8 = keyCode;
+		switch (_p8) {
 			case 38:
 				return A3(_user$project$Main$changeDirection, model, model.snake, _user$project$Main$Up);
 			case 40:
@@ -10527,22 +10552,14 @@ var _user$project$Main$keyUp = F2(
 				return A3(_user$project$Main$changeDirection, model, model.snake, _user$project$Main$Left);
 			case 39:
 				return A3(_user$project$Main$changeDirection, model, model.snake, _user$project$Main$Right);
-			case 87:
-				return A3(_user$project$Main$changeDirection, model, model.snake2, _user$project$Main$Up);
-			case 83:
-				return A3(_user$project$Main$changeDirection, model, model.snake2, _user$project$Main$Down);
-			case 65:
-				return A3(_user$project$Main$changeDirection, model, model.snake2, _user$project$Main$Left);
-			case 68:
-				return A3(_user$project$Main$changeDirection, model, model.snake2, _user$project$Main$Right);
 			default:
 				return model;
 		}
 	});
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p10 = msg;
-		switch (_p10.ctor) {
+		var _p9 = msg;
+		switch (_p9.ctor) {
 			case 'None':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
@@ -10552,7 +10569,7 @@ var _user$project$Main$update = F2(
 			case 'KeyUp':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					A2(_user$project$Main$keyUp, _p10._0, model),
+					A2(_user$project$Main$keyUp, _p9._0, model),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			case 'KeyDown':
@@ -10566,25 +10583,25 @@ var _user$project$Main$update = F2(
 			case 'OriginRecalculate':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					A2(_user$project$Main$recalculateOrigin, model, _p10._0),
+					A2(_user$project$Main$recalculateOrigin, model, _p9._0),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			case 'NextFood':
-				var _p11 = _p10._0;
+				var _p10 = _p9._0;
 				var a = A2(
 					_elm_lang$core$Debug$log,
 					'next food',
-					_elm_lang$core$Basics$toString(_p11));
+					_elm_lang$core$Basics$toString(_p10));
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					A2(_user$project$Main$nextFood, model, _p11),
+					A2(_user$project$Main$nextFood, model, _p10),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			case 'JoinChannel':
 				var channel = _fbonetti$elm_phoenix_socket$Phoenix_Channel$init(_user$project$Main$channelName);
-				var _p12 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$join, channel, model.phxSocket);
-				var phxSocket = _p12._0;
-				var phxCmd = _p12._1;
+				var _p11 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$join, channel, model.phxSocket);
+				var phxSocket = _p11._0;
+				var phxCmd = _p11._1;
 				var a = A2(_elm_lang$core$Debug$log, 'joiining channel', channel);
 				return {
 					ctor: '_Tuple2',
@@ -10594,9 +10611,9 @@ var _user$project$Main$update = F2(
 					_1: A2(_elm_lang$core$Platform_Cmd$map, _user$project$Main$PhoenixMsg, phxCmd)
 				};
 			case 'PhoenixMsg':
-				var _p13 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$update, _p10._0, model.phxSocket);
-				var phxSocket = _p13._0;
-				var phxCmd = _p13._1;
+				var _p12 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$update, _p9._0, model.phxSocket);
+				var phxSocket = _p12._0;
+				var phxCmd = _p12._1;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(

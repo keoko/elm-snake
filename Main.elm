@@ -29,7 +29,7 @@ channelName = "room:lobby"
 
 type alias Model =
     { snake : Snake
-    , snake2 : Snake
+    , snakes : List Snake
     , food : Point
     , origin : (Int, Int)
     , maxX : Int
@@ -86,7 +86,11 @@ initialFoodPoint = newPoint 200 0
 model : Model
 model =
     { snake = newSnake "foo" [initialPoint, (newPoint 501 0), (newPoint 502 0)] Left "green"
-    , snake2 = newSnake "bar" [(newPoint 300 0), (newPoint 301 0), (newPoint 302 0)] Left "blue"
+    , snakes = [ newSnake "bar" [(newPoint 300 0), (newPoint 301 0), (newPoint 302 0)] Left "blue"
+               , newSnake "baz" [(newPoint 300 2), (newPoint 301 2), (newPoint 302 2)] Right "orange"
+               , newSnake "quux" [(newPoint 300 5), (newPoint 301 5), (newPoint 302 5)] Up "violet"
+               ]
+
     , food = initialFoodPoint
     , origin = (0, 0)
     , maxX = 100
@@ -189,19 +193,27 @@ viewFood p = viewBlock p foodColor
 viewSnakeSegment : String -> (Int, Int) -> Html Msg
 viewSnakeSegment color p = viewBlock p color
 
+
+viewSnake : Model -> Snake -> List (Html Msg)
+viewSnake model snake =
+    List.map (\p -> p
+             |> toBrowserCoordinates model.origin
+             |> (viewSnakeSegment snake.color))
+        snake.body
+
 view : Model -> Html Msg
 view model =
     let
 --        a = Debug.log "view model" model.snake
         food = viewFood (toBrowserCoordinates model.origin model.food)
-        snake = List.map (\p -> p |> toBrowserCoordinates model.origin |> (viewSnakeSegment model.snake.color)) model.snake.body
-        snake2 = List.map (\p -> p |> toBrowserCoordinates model.origin |> (viewSnakeSegment model.snake2.color)) model.snake2.body
+        snake = viewSnake model model.snake
+        snakes = List.concatMap (viewSnake model) model.snakes
     in
         div []
         [
          text <| (toString model.food) ++ (toString <| head model.snake)
         , button [ onClick JoinChannel ] [ text "Join lobby" ]
-        , div [] (food :: (snake ++ snake2))
+        , div [] (food :: (snake ++ snakes))
         ]
 
 subscriptions : Model -> Sub Msg
@@ -297,14 +309,10 @@ moveSnakes model =
     let
         model' = moveSnake model model.snake
         (model'', cmd) = checkForFood model' model'.snake
-        model''' = moveSnake model'' model''.snake2
-        (model'''', cmd') = checkForFood model''' model'''.snake2
-        -- (model'', cmd'') =
-        --      model'
-        --          |> flip moveSnake model.snake2
-        --          |> flip checkForFood model.snake2
+        -- todo: move the rest of the snakes
+        --(model''', [cmd]) = List.fold
     in
-        model'''' ! [cmd, cmd']
+        model'' ! [cmd]
 
 checkForFood : Model -> Snake -> (Model, Cmd Msg)
 checkForFood model snake =
@@ -318,6 +326,7 @@ randomPoint : Model -> Generator Point
 randomPoint model =
     let
         --r = Random.pair (Random.int (0 - model.maxX) model.maxX) (Random.int (0 - model.maxY) model.maxY)
+        -- todo: just for testing, it has been fixed to y = 0, the test snake eating food
         r = Random.pair (Random.int (0 - model.maxX) model.maxX) (Random.int 0 0)
     in
         Random.map (\(x,y) -> newPoint x y) r
@@ -363,14 +372,6 @@ keyUp keyCode model =
             changeDirection model model.snake Left
         39 ->
             changeDirection model model.snake Right
-        87 ->
-            changeDirection model model.snake2 Up
-        83 ->
-            changeDirection model model.snake2 Down
-        65 ->
-            changeDirection model model.snake2 Left
-        68 ->
-            changeDirection model model.snake2 Right
         _ ->
             model
 
@@ -383,11 +384,10 @@ changeDirection model snake direction =
     let
         snake' = { snake | direction = direction }
     in
-        if snake.id == "foo" then
+        if snake.id == model.snake.id then
             { model | snake = snake' }
         else
-            { model | snake2 = snake' }
-
+            updateSnake model snake'
 
 newPoint : Int -> Int -> Point
 newPoint x y =
@@ -405,10 +405,10 @@ newSnake id body direction color =
 
 updateSnake : Model -> Snake -> Model
 updateSnake model snake =
-    if snake.id == "foo" then
+    if snake.id == model.snake.id then
         { model | snake = snake }
     else
-        { model | snake2 = snake }
+        { model | snakes = (List.map (\s -> if s.id == snake.id then snake else s) model.snakes )}
 
 initPhxSocket : Phoenix.Socket.Socket Msg
 initPhxSocket =
