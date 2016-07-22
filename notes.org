@@ -41,6 +41,7 @@ Debug.log
 CLOSED: [2016-07-12 Tue 08:40]
 ** TODO eat food if it's near, no exact position
 ** TODO Start, Game, End pages
+** TODO scoring
 ** DONE reduce number of parenthesis
 CLOSED: [2016-07-18 Mon 23:19]
 >>, <<, and other functions.
@@ -83,6 +84,7 @@ https://www.gitbook.com/book/sbaechler/elm-hexagon/details
 http://sonnym.github.io/2014/05/05/writing-game-of-life-in-elm/
 http://www.elmfiddle.io/view/ciohidiwb0000ittvijce7hy5
 http://guide.elm-lang.org/architecture/effects/random.html
+http://www.asquare.net/javascript/tests/KeyCode.html
 
 
 * Issues

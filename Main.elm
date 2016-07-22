@@ -1,8 +1,9 @@
 module Main exposing (..)
 
 import Html.App as App
-import Html exposing (Html, text, div)
+import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (id, style)
+import Html.Events exposing (onClick, onInput)
 import Keyboard exposing (KeyCode)
 import AnimationFrame
 import Time exposing (Time)
@@ -10,6 +11,20 @@ import Task
 import Window
 import Random exposing (initialSeed, Seed, Generator, generate)
 import Debug exposing (log)
+import Json.Encode as Json
+import Phoenix.Socket
+import Phoenix.Channel
+import Phoenix.Push
+
+host : String
+host = "http://localhost:4000"
+
+socketServer : String
+socketServer = "ws://localhost:4000/socket/websocket"
+
+channelName : String
+channelName = "room:lobby"
+
 
 
 type alias Model =
@@ -20,6 +35,7 @@ type alias Model =
     , maxX : Int
     , maxY : Int
     , seed : Seed
+    , phxSocket : Phoenix.Socket.Socket Msg
     }
 
 type alias Snake =
@@ -34,6 +50,9 @@ type Msg = TimeUpdate  Time
       | KeyDown KeyCode
       | OriginRecalculate Window.Size
       | NextFood Point
+      | PhoenixMsg (Phoenix.Socket.Msg Msg)
+      | JoinChannel
+      | SnakeCommand Json.Value
       | None
 
 type Direction = Up | Down | Left | Right
@@ -73,6 +92,7 @@ model =
     , maxX = 100
     , maxY = 100
     , seed = initialSeed 1000
+    , phxSocket = initPhxSocket
     }
 
 init : (Model, Cmd Msg)
@@ -105,6 +125,25 @@ update msg model =
                 a = Debug.log "next food" <| toString point
             in
                 (nextFood model point) ! []
+        JoinChannel ->
+            let
+                channel = Phoenix.Channel.init channelName
+                ( phxSocket, phxCmd ) = Phoenix.Socket.join channel model.phxSocket
+                a = Debug.log "joiining channel" channel
+            in
+                ( { model | phxSocket = phxSocket }
+                , Cmd.map PhoenixMsg phxCmd
+                )
+        PhoenixMsg msg ->
+            let
+                ( phxSocket, phxCmd ) =
+                    Phoenix.Socket.update msg model.phxSocket
+            in
+                ( { model | phxSocket = phxSocket }
+                , Cmd.map PhoenixMsg phxCmd
+                )
+        SnakeCommand _ ->
+            model ! []
 
 
 recalculateOrigin : Model -> Window.Size -> Model
@@ -161,7 +200,8 @@ view model =
         div []
         [
          text <| (toString model.food) ++ (toString <| head model.snake)
-         ,div [] (food :: (snake ++ snake2))
+        , button [ onClick JoinChannel ] [ text "Join lobby" ]
+        , div [] (food :: (snake ++ snake2))
         ]
 
 subscriptions : Model -> Sub Msg
@@ -170,6 +210,7 @@ subscriptions model =
         [ Keyboard.ups KeyUp
         , Keyboard.downs KeyDown
         , Window.resizes recalculateOriginMsg
+        , Phoenix.Socket.listen model.phxSocket PhoenixMsg
         , AnimationFrame.diffs (\time ->
                                     if ((round time) `rem` 1 == 0) then
                                         TimeUpdate time
@@ -368,3 +409,9 @@ updateSnake model snake =
         { model | snake = snake }
     else
         { model | snake2 = snake }
+
+initPhxSocket : Phoenix.Socket.Socket Msg
+initPhxSocket =
+    Phoenix.Socket.init socketServer
+        |> Phoenix.Socket.withDebug
+        |> Phoenix.Socket.on "snake:command" channelName SnakeCommand
