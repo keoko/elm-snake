@@ -87,8 +87,8 @@ model : Model
 model =
     { snake = newSnake "foo" [initialPoint, (newPoint 501 0), (newPoint 502 0)] Left "green"
     , snakes = [ newSnake "bar" [(newPoint 300 0), (newPoint 301 0), (newPoint 302 0)] Left "blue"
-               , newSnake "baz" [(newPoint 300 2), (newPoint 301 2), (newPoint 302 2)] Right "orange"
-               , newSnake "quux" [(newPoint 300 5), (newPoint 301 5), (newPoint 302 5)] Up "violet"
+               , newSnake "baz" [(newPoint 300 20), (newPoint 301 20), (newPoint 302 20)] Right "orange"
+               , newSnake "quux" [(newPoint 300 50), (newPoint 301 50), (newPoint 302 50)] Up "violet"
                ]
 
     , food = initialFoodPoint
@@ -288,8 +288,8 @@ moveRight model snake =
         moveHead model snake point'
 
 
-moveSnake : Model -> Snake -> Model
-moveSnake model snake =
+moveSnake : Snake -> Model -> Model
+moveSnake snake model =
     case snake.direction of
         Up ->
             moveUp model snake
@@ -307,15 +307,24 @@ nextStep model =
 moveSnakes : Model -> (Model, Cmd Msg)
 moveSnakes model =
     let
-        model' = moveSnake model model.snake
-        (model'', cmd) = checkForFood model' model'.snake
-        -- todo: move the rest of the snakes
-        --(model''', [cmd]) = List.fold
-    in
-        model'' ! [cmd]
+        --model' = moveSnake model model.snake
+        --(model'', cmd) = checkForFood model' model'.snake
 
-checkForFood : Model -> Snake -> (Model, Cmd Msg)
-checkForFood model snake =
+       snakes = model.snake :: model.snakes
+
+        -- todo: move the rest of the snakes
+        -- todo: fold it
+        --(model''', [cmd]) = List.fold
+       f s (m, c) = m
+                  |> moveSnake s
+                  |> (\ m' -> checkForFood (getSnake s m') m')
+                  |> (\ (m'',c'') -> m'' ! [c, c''])
+    in
+        List.foldr f (model ! []) snakes
+        --model'' ! [cmd]
+
+checkForFood : Snake -> Model -> (Model, Cmd Msg)
+checkForFood snake model =
     if canEatFood model snake then
         eatFood model snake
     else
@@ -409,6 +418,17 @@ updateSnake model snake =
         { model | snake = snake }
     else
         { model | snakes = (List.map (\s -> if s.id == snake.id then snake else s) model.snakes )}
+
+
+getSnake : Snake -> Model -> Snake
+getSnake snake model =
+    if snake.id == model.snake.id then
+        model.snake
+    else
+        let
+            snakes = List.filter (\s -> s.id == snake.id) model.snakes
+        in
+            Maybe.withDefault model.snake <| List.head snakes
 
 initPhxSocket : Phoenix.Socket.Socket Msg
 initPhxSocket =

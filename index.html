@@ -10126,6 +10126,23 @@ var _fbonetti$elm_phoenix_socket$Phoenix_Socket$listen = F2(
 					_fbonetti$elm_phoenix_socket$Phoenix_Socket$externalMsgs(socket)
 				]));
 	});
+var _user$project$Main$getSnake = F2(
+	function (snake, model) {
+		if (_elm_lang$core$Native_Utils.eq(snake.id, model.snake.id)) {
+			return model.snake;
+		} else {
+			var snakes = A2(
+				_elm_lang$core$List$filter,
+				function (s) {
+					return _elm_lang$core$Native_Utils.eq(s.id, snake.id);
+				},
+				model.snakes);
+			return A2(
+				_elm_lang$core$Maybe$withDefault,
+				model.snake,
+				_elm_lang$core$List$head(snakes));
+		}
+	});
 var _user$project$Main$updateSnake = F2(
 	function (model, snake) {
 		return _elm_lang$core$Native_Utils.eq(snake.id, model.snake.id) ? _elm_lang$core$Native_Utils.update(
@@ -10312,7 +10329,7 @@ var _user$project$Main$moveRight = F2(
 		return A3(_user$project$Main$moveHead, model, snake, point$);
 	});
 var _user$project$Main$moveSnake = F2(
-	function (model, snake) {
+	function (snake, model) {
 		var _p5 = snake.direction;
 		switch (_p5.ctor) {
 			case 'Up':
@@ -10422,19 +10439,39 @@ var _user$project$Main$eatFood = F2(
 		};
 	});
 var _user$project$Main$checkForFood = F2(
-	function (model, snake) {
+	function (snake, model) {
 		return A2(_user$project$Main$canEatFood, model, snake) ? A2(_user$project$Main$eatFood, model, snake) : A2(_user$project$Main$moveTail, model, snake);
 	});
 var _user$project$Main$moveSnakes = function (model) {
-	var model$ = A2(_user$project$Main$moveSnake, model, model.snake);
-	var _p6 = A2(_user$project$Main$checkForFood, model$, model$.snake);
-	var model$$ = _p6._0;
-	var cmd = _p6._1;
-	return A2(
-		_elm_lang$core$Platform_Cmd_ops['!'],
-		model$$,
-		_elm_lang$core$Native_List.fromArray(
-			[cmd]));
+	var f = F2(
+		function (s, _p6) {
+			var _p7 = _p6;
+			return function (_p8) {
+				var _p9 = _p8;
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_p9._0,
+					_elm_lang$core$Native_List.fromArray(
+						[_p7._1, _p9._1]));
+			}(
+				function (m$) {
+					return A2(
+						_user$project$Main$checkForFood,
+						A2(_user$project$Main$getSnake, s, m$),
+						m$);
+				}(
+					A2(_user$project$Main$moveSnake, s, _p7._0)));
+		});
+	var snakes = A2(_elm_lang$core$List_ops['::'], model.snake, model.snakes);
+	return A3(
+		_elm_lang$core$List$foldr,
+		f,
+		A2(
+			_elm_lang$core$Platform_Cmd_ops['!'],
+			model,
+			_elm_lang$core$Native_List.fromArray(
+				[])),
+		snakes);
 };
 var _user$project$Main$nextStep = function (model) {
 	return _user$project$Main$moveSnakes(model);
@@ -10447,7 +10484,7 @@ var _user$project$Main$recalculateOriginMsg = function (size) {
 };
 var _user$project$Main$initialOrigin = A3(
 	_elm_lang$core$Task$perform,
-	function (_p7) {
+	function (_p10) {
 		return _user$project$Main$None;
 	},
 	_user$project$Main$recalculateOriginMsg,
@@ -10514,9 +10551,9 @@ var _user$project$Main$model = {
 			'baz',
 			_elm_lang$core$Native_List.fromArray(
 				[
-					A2(_user$project$Main$newPoint, 300, 2),
-					A2(_user$project$Main$newPoint, 301, 2),
-					A2(_user$project$Main$newPoint, 302, 2)
+					A2(_user$project$Main$newPoint, 300, 20),
+					A2(_user$project$Main$newPoint, 301, 20),
+					A2(_user$project$Main$newPoint, 302, 20)
 				]),
 			_user$project$Main$Right,
 			'orange'),
@@ -10525,9 +10562,9 @@ var _user$project$Main$model = {
 			'quux',
 			_elm_lang$core$Native_List.fromArray(
 				[
-					A2(_user$project$Main$newPoint, 300, 5),
-					A2(_user$project$Main$newPoint, 301, 5),
-					A2(_user$project$Main$newPoint, 302, 5)
+					A2(_user$project$Main$newPoint, 300, 50),
+					A2(_user$project$Main$newPoint, 301, 50),
+					A2(_user$project$Main$newPoint, 302, 50)
 				]),
 			_user$project$Main$Up,
 			'violet')
@@ -10542,8 +10579,8 @@ var _user$project$Main$model = {
 var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Main$model, _1: _user$project$Main$initialOrigin};
 var _user$project$Main$keyUp = F2(
 	function (keyCode, model) {
-		var _p8 = keyCode;
-		switch (_p8) {
+		var _p11 = keyCode;
+		switch (_p11) {
 			case 38:
 				return A3(_user$project$Main$changeDirection, model, model.snake, _user$project$Main$Up);
 			case 40:
@@ -10558,8 +10595,8 @@ var _user$project$Main$keyUp = F2(
 	});
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p9 = msg;
-		switch (_p9.ctor) {
+		var _p12 = msg;
+		switch (_p12.ctor) {
 			case 'None':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
@@ -10569,7 +10606,7 @@ var _user$project$Main$update = F2(
 			case 'KeyUp':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					A2(_user$project$Main$keyUp, _p9._0, model),
+					A2(_user$project$Main$keyUp, _p12._0, model),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			case 'KeyDown':
@@ -10583,25 +10620,25 @@ var _user$project$Main$update = F2(
 			case 'OriginRecalculate':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					A2(_user$project$Main$recalculateOrigin, model, _p9._0),
+					A2(_user$project$Main$recalculateOrigin, model, _p12._0),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			case 'NextFood':
-				var _p10 = _p9._0;
+				var _p13 = _p12._0;
 				var a = A2(
 					_elm_lang$core$Debug$log,
 					'next food',
-					_elm_lang$core$Basics$toString(_p10));
+					_elm_lang$core$Basics$toString(_p13));
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					A2(_user$project$Main$nextFood, model, _p10),
+					A2(_user$project$Main$nextFood, model, _p13),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			case 'JoinChannel':
 				var channel = _fbonetti$elm_phoenix_socket$Phoenix_Channel$init(_user$project$Main$channelName);
-				var _p11 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$join, channel, model.phxSocket);
-				var phxSocket = _p11._0;
-				var phxCmd = _p11._1;
+				var _p14 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$join, channel, model.phxSocket);
+				var phxSocket = _p14._0;
+				var phxCmd = _p14._1;
 				var a = A2(_elm_lang$core$Debug$log, 'joiining channel', channel);
 				return {
 					ctor: '_Tuple2',
@@ -10611,9 +10648,9 @@ var _user$project$Main$update = F2(
 					_1: A2(_elm_lang$core$Platform_Cmd$map, _user$project$Main$PhoenixMsg, phxCmd)
 				};
 			case 'PhoenixMsg':
-				var _p12 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$update, _p9._0, model.phxSocket);
-				var phxSocket = _p12._0;
-				var phxCmd = _p12._1;
+				var _p15 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$update, _p12._0, model.phxSocket);
+				var phxSocket = _p15._0;
+				var phxCmd = _p15._1;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
