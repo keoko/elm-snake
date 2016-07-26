@@ -126,7 +126,7 @@ update msg model =
             (recalculateOrigin model size) ! []
         NextFood point ->
             let
-                a = Debug.log "next food" <| toString point
+                a = False --a = Debug.log "next food" <| toString point
             in
                 (nextFood model point) ! []
         JoinChannel ->
@@ -307,21 +307,15 @@ nextStep model =
 moveSnakes : Model -> (Model, Cmd Msg)
 moveSnakes model =
     let
-        --model' = moveSnake model model.snake
-        --(model'', cmd) = checkForFood model' model'.snake
-
        snakes = model.snake :: model.snakes
 
-        -- todo: move the rest of the snakes
-        -- todo: fold it
-        --(model''', [cmd]) = List.fold
        f s (m, c) = m
-                  |> moveSnake s
+                  |> mayChangeDirection s
+                  |> (\ m''' -> moveSnake (getSnake s m''') m''')
                   |> (\ m' -> checkForFood (getSnake s m') m')
                   |> (\ (m'',c'') -> m'' ! [c, c''])
     in
         List.foldr f (model ! []) snakes
-        --model'' ! [cmd]
 
 checkForFood : Snake -> Model -> (Model, Cmd Msg)
 checkForFood snake model =
@@ -330,6 +324,13 @@ checkForFood snake model =
     else
         moveTail model snake
 
+randomDirection : Model -> Generator Direction
+randomDirection model =
+    Random.map (\x -> if x == 0 then Up
+                      else if x == 1 then Down
+                      else if x == 2 then Right
+                      else Left
+               ) (Random.int 0 3)
 
 randomPoint : Model -> Generator Point
 randomPoint model =
@@ -435,3 +436,15 @@ initPhxSocket =
     Phoenix.Socket.init socketServer
         |> Phoenix.Socket.withDebug
         |> Phoenix.Socket.on "snake:command" channelName SnakeCommand
+
+mayChangeDirection : Snake -> Model -> Model
+mayChangeDirection snake model =
+    if snake.id == model.snake.id then
+        model
+    else
+        let
+            (direction, seed) = Random.step (randomDirection model) model.seed
+            snake' = { snake | direction = direction }
+            model' = { model | seed = seed }
+        in
+            updateSnake model' snake'
