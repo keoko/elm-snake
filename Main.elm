@@ -15,7 +15,7 @@ import Json.Encode as Json
 import Phoenix.Socket
 import Phoenix.Channel
 import Phoenix.Push
-import Json.Decode exposing (Decoder, at, decodeString, decodeValue, succeed, int, string, object1, object4, list, (:=))
+import Json.Decode exposing (Decoder, at, decodeString, decodeValue, succeed, int, string, object1, object2, object4, list, (:=))
 
 host : String
 host = "http://localhost:4000"
@@ -41,8 +41,10 @@ type alias Model =
 
 type alias SnakeId = String
 
-type alias DirectionId =
-    { direction : Int }
+type alias SnakeJsonCommand =
+    { direction : Int
+    , snakeId : SnakeId
+    }
 
 type alias Snake =
     { id : SnakeId
@@ -151,11 +153,11 @@ update msg model =
                 )
         SnakeCommand raw ->
             case decodeValue snakeCommandDecoder raw of
-                Ok {direction} ->
+                Ok {direction, snakeId} ->
                     let
                         l = Debug.log "changing direction through broadcast" raw
                     in
-                        (changeDirection model (getSnake "bar" model) <| intToDirection direction) ! []
+                        (changeDirection model (getSnake snakeId model) <| intToDirection direction) ! []
                 _ ->
                     let
                         l = Debug.log "error when decoding snake command" raw
@@ -318,7 +320,7 @@ moveSnakeInItsDirection snake model =
 moveSnake : Snake -> Model -> (Model, Cmd Msg)
 moveSnake snake model =
     model
-        |> mayChangeDirection snake
+        --|> mayChangeDirection snake
         |> (\ m' -> moveSnakeInItsDirection (getSnake snake.id m') m')
         |> (\ m'' -> checkForFood (getSnake snake.id m'') m'')
 
@@ -473,7 +475,8 @@ mayChangeDirection snake model =
             updateSnake model' snake'
 
 
-snakeCommandDecoder : Decoder DirectionId
+snakeCommandDecoder : Decoder SnakeJsonCommand
 snakeCommandDecoder =
-     object1 DirectionId
+     object2 SnakeJsonCommand
          ("direction" := int)
+         ("snakeId" := string)

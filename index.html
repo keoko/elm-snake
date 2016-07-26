@@ -10359,13 +10359,15 @@ var _user$project$Main$Model = F8(
 	function (a, b, c, d, e, f, g, h) {
 		return {snake: a, snakes: b, food: c, origin: d, maxX: e, maxY: f, seed: g, phxSocket: h};
 	});
-var _user$project$Main$DirectionId = function (a) {
-	return {direction: a};
-};
-var _user$project$Main$snakeCommandDecoder = A2(
-	_elm_lang$core$Json_Decode$object1,
-	_user$project$Main$DirectionId,
-	A2(_elm_lang$core$Json_Decode_ops[':='], 'direction', _elm_lang$core$Json_Decode$int));
+var _user$project$Main$SnakeJsonCommand = F2(
+	function (a, b) {
+		return {direction: a, snakeId: b};
+	});
+var _user$project$Main$snakeCommandDecoder = A3(
+	_elm_lang$core$Json_Decode$object2,
+	_user$project$Main$SnakeJsonCommand,
+	A2(_elm_lang$core$Json_Decode_ops[':='], 'direction', _elm_lang$core$Json_Decode$int),
+	A2(_elm_lang$core$Json_Decode_ops[':='], 'snakeId', _elm_lang$core$Json_Decode$string));
 var _user$project$Main$Snake = F4(
 	function (a, b, c, d) {
 		return {id: a, body: b, direction: c, color: d};
@@ -10448,6 +10450,49 @@ var _user$project$Main$checkForFood = F2(
 	function (snake, model) {
 		return A2(_user$project$Main$canEatFood, model, snake) ? A2(_user$project$Main$eatFood, model, snake) : A2(_user$project$Main$moveTail, model, snake);
 	});
+var _user$project$Main$moveSnake = F2(
+	function (snake, model) {
+		return function (m$$) {
+			return A2(
+				_user$project$Main$checkForFood,
+				A2(_user$project$Main$getSnake, snake.id, m$$),
+				m$$);
+		}(
+			function (m$) {
+				return A2(
+					_user$project$Main$moveSnakeInItsDirection,
+					A2(_user$project$Main$getSnake, snake.id, m$),
+					m$);
+			}(model));
+	});
+var _user$project$Main$moveSnakes = function (model) {
+	var f = F2(
+		function (s, _p6) {
+			var _p7 = _p6;
+			return function (_p8) {
+				var _p9 = _p8;
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_p9._0,
+					_elm_lang$core$Native_List.fromArray(
+						[_p7._1, _p9._1]));
+			}(
+				A2(_user$project$Main$moveSnake, s, _p7._0));
+		});
+	var snakes = A2(_elm_lang$core$List_ops['::'], model.snake, model.snakes);
+	return A3(
+		_elm_lang$core$List$foldr,
+		f,
+		A2(
+			_elm_lang$core$Platform_Cmd_ops['!'],
+			model,
+			_elm_lang$core$Native_List.fromArray(
+				[])),
+		snakes);
+};
+var _user$project$Main$nextStep = function (model) {
+	return _user$project$Main$moveSnakes(model);
+};
 var _user$project$Main$OriginRecalculate = function (a) {
 	return {ctor: 'OriginRecalculate', _0: a};
 };
@@ -10456,7 +10501,7 @@ var _user$project$Main$recalculateOriginMsg = function (size) {
 };
 var _user$project$Main$initialOrigin = A3(
 	_elm_lang$core$Task$perform,
-	function (_p6) {
+	function (_p10) {
 		return _user$project$Main$None;
 	},
 	_user$project$Main$recalculateOriginMsg,
@@ -10563,12 +10608,12 @@ var _user$project$Main$mayChangeDirection = F2(
 		if (_elm_lang$core$Native_Utils.eq(snake.id, model.snake.id) || _elm_lang$core$Native_Utils.eq(snake.id, 'bar')) {
 			return model;
 		} else {
-			var _p7 = A2(
+			var _p11 = A2(
 				_elm_lang$core$Random$step,
 				_user$project$Main$randomDirection(model),
 				model.seed);
-			var direction = _p7._0;
-			var seed = _p7._1;
+			var direction = _p11._0;
+			var seed = _p11._1;
 			var snake$ = _elm_lang$core$Native_Utils.update(
 				snake,
 				{direction: direction});
@@ -10578,50 +10623,6 @@ var _user$project$Main$mayChangeDirection = F2(
 			return A2(_user$project$Main$updateSnake, model$, snake$);
 		}
 	});
-var _user$project$Main$moveSnake = F2(
-	function (snake, model) {
-		return function (m$$) {
-			return A2(
-				_user$project$Main$checkForFood,
-				A2(_user$project$Main$getSnake, snake.id, m$$),
-				m$$);
-		}(
-			function (m$) {
-				return A2(
-					_user$project$Main$moveSnakeInItsDirection,
-					A2(_user$project$Main$getSnake, snake.id, m$),
-					m$);
-			}(
-				A2(_user$project$Main$mayChangeDirection, snake, model)));
-	});
-var _user$project$Main$moveSnakes = function (model) {
-	var f = F2(
-		function (s, _p8) {
-			var _p9 = _p8;
-			return function (_p10) {
-				var _p11 = _p10;
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					_p11._0,
-					_elm_lang$core$Native_List.fromArray(
-						[_p9._1, _p11._1]));
-			}(
-				A2(_user$project$Main$moveSnake, s, _p9._0));
-		});
-	var snakes = A2(_elm_lang$core$List_ops['::'], model.snake, model.snakes);
-	return A3(
-		_elm_lang$core$List$foldr,
-		f,
-		A2(
-			_elm_lang$core$Platform_Cmd_ops['!'],
-			model,
-			_elm_lang$core$Native_List.fromArray(
-				[])),
-		snakes);
-};
-var _user$project$Main$nextStep = function (model) {
-	return _user$project$Main$moveSnakes(model);
-};
 var _user$project$Main$keyUp = F2(
 	function (keyCode, model) {
 		var _p12 = keyCode;
@@ -10709,7 +10710,7 @@ var _user$project$Main$update = F2(
 						A3(
 							_user$project$Main$changeDirection,
 							model,
-							A2(_user$project$Main$getSnake, 'bar', model),
+							A2(_user$project$Main$getSnake, _p16._0.snakeId, model),
 							_user$project$Main$intToDirection(_p16._0.direction)),
 						_elm_lang$core$Native_List.fromArray(
 							[]));
