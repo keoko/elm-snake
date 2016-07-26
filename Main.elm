@@ -339,13 +339,16 @@ checkForFood snake model =
     else
         moveTail model snake
 
+intToDirection : Int -> Direction
+intToDirection x =
+    if x == 0 then Up
+    else if x == 1 then Down
+    else if x == 2 then Right
+    else Left
+
 randomDirection : Model -> Generator Direction
 randomDirection model =
-    Random.map (\x -> if x == 0 then Up
-                      else if x == 1 then Down
-                      else if x == 2 then Right
-                      else Left
-               ) (Random.int 0 3)
+    Random.map intToDirection (Random.int 0 3)
 
 randomPoint : Model -> Generator Point
 randomPoint model =

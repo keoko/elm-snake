@@ -10542,12 +10542,13 @@ var _user$project$Main$model = {
 	phxSocket: _user$project$Main$initPhxSocket
 };
 var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Main$model, _1: _user$project$Main$initialOrigin};
+var _user$project$Main$intToDirection = function (x) {
+	return _elm_lang$core$Native_Utils.eq(x, 0) ? _user$project$Main$Up : (_elm_lang$core$Native_Utils.eq(x, 1) ? _user$project$Main$Down : (_elm_lang$core$Native_Utils.eq(x, 2) ? _user$project$Main$Right : _user$project$Main$Left));
+};
 var _user$project$Main$randomDirection = function (model) {
 	return A2(
 		_elm_lang$core$Random$map,
-		function (x) {
-			return _elm_lang$core$Native_Utils.eq(x, 0) ? _user$project$Main$Up : (_elm_lang$core$Native_Utils.eq(x, 1) ? _user$project$Main$Down : (_elm_lang$core$Native_Utils.eq(x, 2) ? _user$project$Main$Right : _user$project$Main$Left));
-		},
+		_user$project$Main$intToDirection,
 		A2(_elm_lang$core$Random$int, 0, 3));
 };
 var _user$project$Main$mayChangeDirection = F2(
