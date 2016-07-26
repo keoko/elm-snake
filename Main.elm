@@ -41,6 +41,9 @@ type alias Model =
 
 type alias SnakeId = String
 
+type alias DirectionId =
+    { direction : Int }
+
 type alias Snake =
     { id : SnakeId
     , body : List Point
@@ -147,15 +150,17 @@ update msg model =
                 , Cmd.map PhoenixMsg phxCmd
                 )
         SnakeCommand raw ->
-            model ! []
-            -- case decodeValue snakeCommandDecoder raw of
-            --     Ok (s,d) ->
-            --         moveSnake s model
-            --     _ ->
-            --         let
-            --             l = Debug.log "error when decoding snake command" raw
-            --         in
-            --             model
+            case decodeValue snakeCommandDecoder raw of
+                Ok {direction} ->
+                    let
+                        l = Debug.log "changing direction through broadcast" raw
+                    in
+                        (changeDirection model (getSnake "bar" model) <| intToDirection direction) ! []
+                _ ->
+                    let
+                        l = Debug.log "error when decoding snake command" raw
+                    in
+                        model ! []
 
 
 recalculateOrigin : Model -> Window.Size -> Model
@@ -314,8 +319,8 @@ moveSnake : Snake -> Model -> (Model, Cmd Msg)
 moveSnake snake model =
     model
         |> mayChangeDirection snake
-        |> (\ m' -> moveSnakeInItsDirection (getSnake snake m') m')
-        |> (\ m'' -> checkForFood (getSnake snake m'') m'')
+        |> (\ m' -> moveSnakeInItsDirection (getSnake snake.id m') m')
+        |> (\ m'' -> checkForFood (getSnake snake.id m'') m'')
 
 nextStep : Model -> (Model, Cmd Msg)
 nextStep model =
@@ -439,13 +444,13 @@ updateSnake model snake =
         { model | snakes = (List.map (\s -> if s.id == snake.id then snake else s) model.snakes )}
 
 
-getSnake : Snake -> Model -> Snake
-getSnake snake model =
-    if snake.id == model.snake.id then
+getSnake : SnakeId -> Model -> Snake
+getSnake id model =
+    if id == model.snake.id then
         model.snake
     else
         let
-            snakes = List.filter (\s -> s.id == snake.id) model.snakes
+            snakes = List.filter (\s -> s.id == id) model.snakes
         in
             Maybe.withDefault model.snake <| List.head snakes
 
@@ -457,7 +462,7 @@ initPhxSocket =
 
 mayChangeDirection : Snake -> Model -> Model
 mayChangeDirection snake model =
-    if snake.id == model.snake.id then
+    if snake.id == model.snake.id || snake.id == "bar" then
         model
     else
         let
@@ -468,8 +473,7 @@ mayChangeDirection snake model =
             updateSnake model' snake'
 
 
--- snakeCommandDecoder : Decoder (SnakeId, Direction)
--- snakeCommandDecoder =
---     object2 (,)
---         ("snakeId" := string)
---         ("direction" := string)
+snakeCommandDecoder : Decoder DirectionId
+snakeCommandDecoder =
+     object1 DirectionId
+         ("direction" := int)

@@ -40,7 +40,6 @@ Debug.log
 
 CLOSED: [2016-07-12 Tue 08:40]
 ** TODO Start, Game, End pages
-** TODO scoring
 ** TODO use SnakeId instead of Snake as value object
 to avoid recalculating snake state. It should have the snake
 ** DONE reduce number of parenthesis

@@ -10127,14 +10127,14 @@ var _fbonetti$elm_phoenix_socket$Phoenix_Socket$listen = F2(
 				]));
 	});
 var _user$project$Main$getSnake = F2(
-	function (snake, model) {
-		if (_elm_lang$core$Native_Utils.eq(snake.id, model.snake.id)) {
+	function (id, model) {
+		if (_elm_lang$core$Native_Utils.eq(id, model.snake.id)) {
 			return model.snake;
 		} else {
 			var snakes = A2(
 				_elm_lang$core$List$filter,
 				function (s) {
-					return _elm_lang$core$Native_Utils.eq(s.id, snake.id);
+					return _elm_lang$core$Native_Utils.eq(s.id, id);
 				},
 				model.snakes);
 			return A2(
@@ -10359,6 +10359,13 @@ var _user$project$Main$Model = F8(
 	function (a, b, c, d, e, f, g, h) {
 		return {snake: a, snakes: b, food: c, origin: d, maxX: e, maxY: f, seed: g, phxSocket: h};
 	});
+var _user$project$Main$DirectionId = function (a) {
+	return {direction: a};
+};
+var _user$project$Main$snakeCommandDecoder = A2(
+	_elm_lang$core$Json_Decode$object1,
+	_user$project$Main$DirectionId,
+	A2(_elm_lang$core$Json_Decode_ops[':='], 'direction', _elm_lang$core$Json_Decode$int));
 var _user$project$Main$Snake = F4(
 	function (a, b, c, d) {
 		return {id: a, body: b, direction: c, color: d};
@@ -10553,7 +10560,7 @@ var _user$project$Main$randomDirection = function (model) {
 };
 var _user$project$Main$mayChangeDirection = F2(
 	function (snake, model) {
-		if (_elm_lang$core$Native_Utils.eq(snake.id, model.snake.id)) {
+		if (_elm_lang$core$Native_Utils.eq(snake.id, model.snake.id) || _elm_lang$core$Native_Utils.eq(snake.id, 'bar')) {
 			return model;
 		} else {
 			var _p7 = A2(
@@ -10576,13 +10583,13 @@ var _user$project$Main$moveSnake = F2(
 		return function (m$$) {
 			return A2(
 				_user$project$Main$checkForFood,
-				A2(_user$project$Main$getSnake, snake, m$$),
+				A2(_user$project$Main$getSnake, snake.id, m$$),
 				m$$);
 		}(
 			function (m$) {
 				return A2(
 					_user$project$Main$moveSnakeInItsDirection,
-					A2(_user$project$Main$getSnake, snake, m$),
+					A2(_user$project$Main$getSnake, snake.id, m$),
 					m$);
 			}(
 				A2(_user$project$Main$mayChangeDirection, snake, model)));
@@ -10693,11 +10700,27 @@ var _user$project$Main$update = F2(
 					_1: A2(_elm_lang$core$Platform_Cmd$map, _user$project$Main$PhoenixMsg, phxCmd)
 				};
 			default:
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					model,
-					_elm_lang$core$Native_List.fromArray(
-						[]));
+				var _p17 = _p13._0;
+				var _p16 = A2(_elm_lang$core$Json_Decode$decodeValue, _user$project$Main$snakeCommandDecoder, _p17);
+				if (_p16.ctor === 'Ok') {
+					var l = A2(_elm_lang$core$Debug$log, 'changing direction through broadcast', _p17);
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						A3(
+							_user$project$Main$changeDirection,
+							model,
+							A2(_user$project$Main$getSnake, 'bar', model),
+							_user$project$Main$intToDirection(_p16._0.direction)),
+						_elm_lang$core$Native_List.fromArray(
+							[]));
+				} else {
+					var l = A2(_elm_lang$core$Debug$log, 'error when decoding snake command', _p17);
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						model,
+						_elm_lang$core$Native_List.fromArray(
+							[]));
+				}
 		}
 	});
 var _user$project$Main$main = {
