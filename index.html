@@ -10328,7 +10328,7 @@ var _user$project$Main$moveRight = F2(
 		var point$ = (_elm_lang$core$Native_Utils.cmp(h.x + 1, model.maxX) > 0) ? A2(_user$project$Main$newPoint, 0 - model.maxX, h.y) : A2(_user$project$Main$newPoint, h.x + 1, h.y);
 		return A3(_user$project$Main$moveHead, model, snake, point$);
 	});
-var _user$project$Main$moveSnake = F2(
+var _user$project$Main$moveSnakeInItsDirection = F2(
 	function (snake, model) {
 		var _p5 = snake.direction;
 		switch (_p5.ctor) {
@@ -10348,7 +10348,6 @@ var _user$project$Main$canEatFood = F2(
 			_user$project$Main$head(snake),
 			model.food);
 	});
-var _user$project$Main$snakeColor = 'green';
 var _user$project$Main$foodColor = 'red';
 var _user$project$Main$viewFood = function (p) {
 	return A2(_user$project$Main$viewBlock, p, _user$project$Main$foodColor);
@@ -10571,6 +10570,22 @@ var _user$project$Main$mayChangeDirection = F2(
 			return A2(_user$project$Main$updateSnake, model$, snake$);
 		}
 	});
+var _user$project$Main$moveSnake = F2(
+	function (snake, model) {
+		return function (m$$) {
+			return A2(
+				_user$project$Main$checkForFood,
+				A2(_user$project$Main$getSnake, snake, m$$),
+				m$$);
+		}(
+			function (m$) {
+				return A2(
+					_user$project$Main$moveSnakeInItsDirection,
+					A2(_user$project$Main$getSnake, snake, m$),
+					m$);
+			}(
+				A2(_user$project$Main$mayChangeDirection, snake, model)));
+	});
 var _user$project$Main$moveSnakes = function (model) {
 	var f = F2(
 		function (s, _p8) {
@@ -10583,19 +10598,7 @@ var _user$project$Main$moveSnakes = function (model) {
 					_elm_lang$core$Native_List.fromArray(
 						[_p9._1, _p11._1]));
 			}(
-				function (m$) {
-					return A2(
-						_user$project$Main$checkForFood,
-						A2(_user$project$Main$getSnake, s, m$),
-						m$);
-				}(
-					function (m$$$) {
-						return A2(
-							_user$project$Main$moveSnake,
-							A2(_user$project$Main$getSnake, s, m$$$),
-							m$$$);
-					}(
-						A2(_user$project$Main$mayChangeDirection, s, _p9._0))));
+				A2(_user$project$Main$moveSnake, s, _p9._0));
 		});
 	var snakes = A2(_elm_lang$core$List_ops['::'], model.snake, model.snakes);
 	return A3(

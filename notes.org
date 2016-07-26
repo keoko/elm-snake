@@ -41,6 +41,8 @@ Debug.log
 CLOSED: [2016-07-12 Tue 08:40]
 ** TODO Start, Game, End pages
 ** TODO scoring
+** TODO use SnakeId instead of Snake as value object
+to avoid recalculating snake state. It should have the snake
 ** DONE reduce number of parenthesis
 CLOSED: [2016-07-18 Mon 23:19]
 >>, <<, and other functions.
@@ -59,9 +61,12 @@ CLOSED: [2016-07-22 Fri 22:53]
 ** TODO 1 snake with AI snakes
 ** TODO multiple snakes from different computers
 ** TODO eat food if it's near, no exact position
+** TODO update food, new snakes
+** TODO handle game rooms, choose color and snake name
 
 
 * nice to have
+** how to sync state
 ** handle collisions
 ** on window resize move the snake to a visible areao
 ** wall

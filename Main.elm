@@ -15,6 +15,7 @@ import Json.Encode as Json
 import Phoenix.Socket
 import Phoenix.Channel
 import Phoenix.Push
+import Json.Decode exposing (Decoder, at, decodeString, decodeValue, succeed, int, string, object1, object4, list, (:=))
 
 host : String
 host = "http://localhost:4000"
@@ -38,8 +39,10 @@ type alias Model =
     , phxSocket : Phoenix.Socket.Socket Msg
     }
 
+type alias SnakeId = String
+
 type alias Snake =
-    { id : String
+    { id : SnakeId
     , body : List Point
     , direction : Direction
     , color : String
@@ -63,9 +66,6 @@ type alias Point = { x : Int
 
 foodColor : String
 foodColor = "red"
-
-snakeColor : String
-snakeColor = "green"
 
 main : Program Never
 main =
@@ -146,8 +146,16 @@ update msg model =
                 ( { model | phxSocket = phxSocket }
                 , Cmd.map PhoenixMsg phxCmd
                 )
-        SnakeCommand _ ->
+        SnakeCommand raw ->
             model ! []
+            -- case decodeValue snakeCommandDecoder raw of
+            --     Ok (s,d) ->
+            --         moveSnake s model
+            --     _ ->
+            --         let
+            --             l = Debug.log "error when decoding snake command" raw
+            --         in
+            --             model
 
 
 recalculateOrigin : Model -> Window.Size -> Model
@@ -288,8 +296,8 @@ moveRight model snake =
         moveHead model snake point'
 
 
-moveSnake : Snake -> Model -> Model
-moveSnake snake model =
+moveSnakeInItsDirection : Snake -> Model -> Model
+moveSnakeInItsDirection snake model =
     case snake.direction of
         Up ->
             moveUp model snake
@@ -299,6 +307,15 @@ moveSnake snake model =
             moveLeft model snake
         Right ->
             moveRight model snake
+
+
+
+moveSnake : Snake -> Model -> (Model, Cmd Msg)
+moveSnake snake model =
+    model
+        |> mayChangeDirection snake
+        |> (\ m' -> moveSnakeInItsDirection (getSnake snake m') m')
+        |> (\ m'' -> checkForFood (getSnake snake m'') m'')
 
 nextStep : Model -> (Model, Cmd Msg)
 nextStep model =
@@ -310,10 +327,8 @@ moveSnakes model =
        snakes = model.snake :: model.snakes
 
        f s (m, c) = m
-                  |> mayChangeDirection s
-                  |> (\ m''' -> moveSnake (getSnake s m''') m''')
-                  |> (\ m' -> checkForFood (getSnake s m') m')
-                  |> (\ (m'',c'') -> m'' ! [c, c''])
+                  |> moveSnake s
+                  |> (\ (m',c') -> m' ! [c, c'])
     in
         List.foldr f (model ! []) snakes
 
@@ -448,3 +463,10 @@ mayChangeDirection snake model =
             model' = { model | seed = seed }
         in
             updateSnake model' snake'
+
+
+-- snakeCommandDecoder : Decoder (SnakeId, Direction)
+-- snakeCommandDecoder =
+--     object2 (,)
+--         ("snakeId" := string)
+--         ("direction" := string)
