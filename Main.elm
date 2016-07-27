@@ -60,7 +60,7 @@ type Msg = TimeUpdate  Time
       | NextFood Point
       | PhoenixMsg (Phoenix.Socket.Msg Msg)
       | JoinChannel
-      | SendCommand
+      | SendCommand SnakeJsonCommand
       | ReceiveCommand Json.Value
       | None
 
@@ -164,11 +164,12 @@ update msg model =
                         l = Debug.log "error when decoding snake command" raw
                     in
                         model ! []
-        SendCommand ->
+        SendCommand {snakeId, direction} ->
             let
                 -- We'll build our message out as a json encoded object
                 payload =
-                    (Json.object [ ( "body", Json.string "this is a test" ) ])
+                    (Json.object [ ( "snakeId", Json.string snakeId )
+                                 , ( "direction", Json.int direction) ])
                 -- We prepare to push the message
                 push' =
                     Phoenix.Push.init "new:msg" channelName
@@ -250,7 +251,7 @@ view model =
         [
          text <| (toString model.food) ++ (toString <| head model.snake)
         , button [ onClick JoinChannel ] [ text "Join lobby" ]
-        , button [ onClick SendCommand ] [ text "Send command" ]
+        , button [ onClick (SendCommand {snakeId = "baz", direction = 1}) ] [ text "Send command" ]
         , div [] (food :: (snake ++ snakes))
         ]
 
