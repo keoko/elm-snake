@@ -60,7 +60,8 @@ type Msg = TimeUpdate  Time
       | NextFood Point
       | PhoenixMsg (Phoenix.Socket.Msg Msg)
       | JoinChannel
-      | SnakeCommand Json.Value
+      | SendCommand
+      | ReceiveCommand Json.Value
       | None
 
 type Direction = Up | Down | Left | Right
@@ -151,7 +152,7 @@ update msg model =
                 ( { model | phxSocket = phxSocket }
                 , Cmd.map PhoenixMsg phxCmd
                 )
-        SnakeCommand raw ->
+        ReceiveCommand raw ->
             case decodeValue snakeCommandDecoder raw of
                 Ok {direction, snakeId} ->
                     let
@@ -163,6 +164,27 @@ update msg model =
                         l = Debug.log "error when decoding snake command" raw
                     in
                         model ! []
+        SendCommand ->
+            let
+                -- We'll build our message out as a json encoded object
+                payload =
+                    (Json.object [ ( "body", Json.string "this is a test" ) ])
+                -- We prepare to push the message
+                push' =
+                    Phoenix.Push.init "new:msg" channelName
+                        |> Phoenix.Push.withPayload payload
+                -- We update our `phxSocket` and `phxCmd` by passing this push
+                -- into the Phoenix.Socket.push function
+                ( phxSocket, phxCmd ) =
+                    Phoenix.Socket.push push' model.phxSocket
+            in
+                -- And we clear out the `newMessage` field, update our model's
+                -- socket, and return our Phoenix command
+                ( { model |
+                      phxSocket = phxSocket
+                  }
+                , Cmd.map PhoenixMsg phxCmd
+                )
 
 
 recalculateOrigin : Model -> Window.Size -> Model
@@ -228,6 +250,7 @@ view model =
         [
          text <| (toString model.food) ++ (toString <| head model.snake)
         , button [ onClick JoinChannel ] [ text "Join lobby" ]
+        , button [ onClick SendCommand ] [ text "Send command" ]
         , div [] (food :: (snake ++ snakes))
         ]
 
@@ -314,8 +337,6 @@ moveSnakeInItsDirection snake model =
             moveLeft model snake
         Right ->
             moveRight model snake
-
-
 
 moveSnake : Snake -> Model -> (Model, Cmd Msg)
 moveSnake snake model =
@@ -460,7 +481,7 @@ initPhxSocket : Phoenix.Socket.Socket Msg
 initPhxSocket =
     Phoenix.Socket.init socketServer
         |> Phoenix.Socket.withDebug
-        |> Phoenix.Socket.on "snake:command" channelName SnakeCommand
+        |> Phoenix.Socket.on "snake:command" channelName ReceiveCommand
 
 mayChangeDirection : Snake -> Model -> Model
 mayChangeDirection snake model =

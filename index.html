@@ -10377,16 +10377,17 @@ var _user$project$Main$Point = F2(
 		return {x: a, y: b};
 	});
 var _user$project$Main$None = {ctor: 'None'};
-var _user$project$Main$SnakeCommand = function (a) {
-	return {ctor: 'SnakeCommand', _0: a};
+var _user$project$Main$ReceiveCommand = function (a) {
+	return {ctor: 'ReceiveCommand', _0: a};
 };
 var _user$project$Main$initPhxSocket = A4(
 	_fbonetti$elm_phoenix_socket$Phoenix_Socket$on,
 	'snake:command',
 	_user$project$Main$channelName,
-	_user$project$Main$SnakeCommand,
+	_user$project$Main$ReceiveCommand,
 	_fbonetti$elm_phoenix_socket$Phoenix_Socket$withDebug(
 		_fbonetti$elm_phoenix_socket$Phoenix_Socket$init(_user$project$Main$socketServer)));
+var _user$project$Main$SendCommand = {ctor: 'SendCommand'};
 var _user$project$Main$JoinChannel = {ctor: 'JoinChannel'};
 var _user$project$Main$view = function (model) {
 	var snakes = A2(
@@ -10417,6 +10418,16 @@ var _user$project$Main$view = function (model) {
 				_elm_lang$core$Native_List.fromArray(
 					[
 						_elm_lang$html$Html$text('Join lobby')
+					])),
+				A2(
+				_elm_lang$html$Html$button,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Events$onClick(_user$project$Main$SendCommand)
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text('Send command')
 					])),
 				A2(
 				_elm_lang$html$Html$div,
@@ -10700,7 +10711,7 @@ var _user$project$Main$update = F2(
 						{phxSocket: phxSocket}),
 					_1: A2(_elm_lang$core$Platform_Cmd$map, _user$project$Main$PhoenixMsg, phxCmd)
 				};
-			default:
+			case 'ReceiveCommand':
 				var _p17 = _p13._0;
 				var _p16 = A2(_elm_lang$core$Json_Decode$decodeValue, _user$project$Main$snakeCommandDecoder, _p17);
 				if (_p16.ctor === 'Ok') {
@@ -10722,6 +10733,30 @@ var _user$project$Main$update = F2(
 						_elm_lang$core$Native_List.fromArray(
 							[]));
 				}
+			default:
+				var payload = _elm_lang$core$Json_Encode$object(
+					_elm_lang$core$Native_List.fromArray(
+						[
+							{
+							ctor: '_Tuple2',
+							_0: 'body',
+							_1: _elm_lang$core$Json_Encode$string('this is a test')
+						}
+						]));
+				var push$ = A2(
+					_fbonetti$elm_phoenix_socket$Phoenix_Push$withPayload,
+					payload,
+					A2(_fbonetti$elm_phoenix_socket$Phoenix_Push$init, 'new:msg', _user$project$Main$channelName));
+				var _p18 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$push, push$, model.phxSocket);
+				var phxSocket = _p18._0;
+				var phxCmd = _p18._1;
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{phxSocket: phxSocket}),
+					_1: A2(_elm_lang$core$Platform_Cmd$map, _user$project$Main$PhoenixMsg, phxCmd)
+				};
 		}
 	});
 var _user$project$Main$main = {
