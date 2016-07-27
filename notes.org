@@ -65,7 +65,7 @@ CLOSED: [2016-07-22 Fri 22:53]
 
 
 * nice to have
-** how to sync state
+** sync clients: vector clock?
 ** handle collisions
 ** on window resize move the snake to a visible areao
 ** wall
@@ -103,3 +103,4 @@ just removed the elm-stuff directory and it worked. No clue what happened.
 
 I need whitespace, but got stuck on what looks like a new declaration. You are ...
 ** how to add traces? Debug.log?
+** Enum? intToDirection, directionToInt

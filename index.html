@@ -10387,9 +10387,6 @@ var _user$project$Main$initPhxSocket = A4(
 	_user$project$Main$ReceiveCommand,
 	_fbonetti$elm_phoenix_socket$Phoenix_Socket$withDebug(
 		_fbonetti$elm_phoenix_socket$Phoenix_Socket$init(_user$project$Main$socketServer)));
-var _user$project$Main$SendCommand = function (a) {
-	return {ctor: 'SendCommand', _0: a};
-};
 var _user$project$Main$JoinChannel = {ctor: 'JoinChannel'};
 var _user$project$Main$view = function (model) {
 	var snakes = A2(
@@ -10422,18 +10419,6 @@ var _user$project$Main$view = function (model) {
 						_elm_lang$html$Html$text('Join lobby')
 					])),
 				A2(
-				_elm_lang$html$Html$button,
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html_Events$onClick(
-						_user$project$Main$SendCommand(
-							{snakeId: 'baz', direction: 1}))
-					]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text('Send command')
-					])),
-				A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
 					[]),
@@ -10446,6 +10431,38 @@ var _user$project$Main$view = function (model) {
 var _user$project$Main$PhoenixMsg = function (a) {
 	return {ctor: 'PhoenixMsg', _0: a};
 };
+var _user$project$Main$sendCommand = F2(
+	function (_p6, model) {
+		var _p7 = _p6;
+		var payload = _elm_lang$core$Json_Encode$object(
+			_elm_lang$core$Native_List.fromArray(
+				[
+					{
+					ctor: '_Tuple2',
+					_0: 'snakeId',
+					_1: _elm_lang$core$Json_Encode$string(_p7.snakeId)
+				},
+					{
+					ctor: '_Tuple2',
+					_0: 'direction',
+					_1: _elm_lang$core$Json_Encode$int(_p7.direction)
+				}
+				]));
+		var push$ = A2(
+			_fbonetti$elm_phoenix_socket$Phoenix_Push$withPayload,
+			payload,
+			A2(_fbonetti$elm_phoenix_socket$Phoenix_Push$init, 'new:msg', _user$project$Main$channelName));
+		var _p8 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$push, push$, model.phxSocket);
+		var phxSocket = _p8._0;
+		var phxCmd = _p8._1;
+		return {
+			ctor: '_Tuple2',
+			_0: _elm_lang$core$Native_Utils.update(
+				model,
+				{phxSocket: phxSocket}),
+			_1: A2(_elm_lang$core$Platform_Cmd$map, _user$project$Main$PhoenixMsg, phxCmd)
+		};
+	});
 var _user$project$Main$NextFood = function (a) {
 	return {ctor: 'NextFood', _0: a};
 };
@@ -10482,17 +10499,17 @@ var _user$project$Main$moveSnake = F2(
 	});
 var _user$project$Main$moveSnakes = function (model) {
 	var f = F2(
-		function (s, _p6) {
-			var _p7 = _p6;
-			return function (_p8) {
-				var _p9 = _p8;
+		function (s, _p9) {
+			var _p10 = _p9;
+			return function (_p11) {
+				var _p12 = _p11;
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					_p9._0,
+					_p12._0,
 					_elm_lang$core$Native_List.fromArray(
-						[_p7._1, _p9._1]));
+						[_p10._1, _p12._1]));
 			}(
-				A2(_user$project$Main$moveSnake, s, _p7._0));
+				A2(_user$project$Main$moveSnake, s, _p10._0));
 		});
 	var snakes = A2(_elm_lang$core$List_ops['::'], model.snake, model.snakes);
 	return A3(
@@ -10516,7 +10533,7 @@ var _user$project$Main$recalculateOriginMsg = function (size) {
 };
 var _user$project$Main$initialOrigin = A3(
 	_elm_lang$core$Task$perform,
-	function (_p10) {
+	function (_p13) {
 		return _user$project$Main$None;
 	},
 	_user$project$Main$recalculateOriginMsg,
@@ -10623,12 +10640,12 @@ var _user$project$Main$mayChangeDirection = F2(
 		if (_elm_lang$core$Native_Utils.eq(snake.id, model.snake.id) || _elm_lang$core$Native_Utils.eq(snake.id, 'bar')) {
 			return model;
 		} else {
-			var _p11 = A2(
+			var _p14 = A2(
 				_elm_lang$core$Random$step,
 				_user$project$Main$randomDirection(model),
 				model.seed);
-			var direction = _p11._0;
-			var seed = _p11._1;
+			var direction = _p14._0;
+			var seed = _p14._1;
 			var snake$ = _elm_lang$core$Native_Utils.update(
 				snake,
 				{direction: direction});
@@ -10638,26 +10655,38 @@ var _user$project$Main$mayChangeDirection = F2(
 			return A2(_user$project$Main$updateSnake, model$, snake$);
 		}
 	});
+var _user$project$Main$directionToInt = function (direction) {
+	return _elm_lang$core$Native_Utils.eq(direction, _user$project$Main$Up) ? 0 : (_elm_lang$core$Native_Utils.eq(direction, _user$project$Main$Down) ? 1 : (_elm_lang$core$Native_Utils.eq(direction, _user$project$Main$Right) ? 2 : 3));
+};
 var _user$project$Main$keyUp = F2(
 	function (keyCode, model) {
-		var _p12 = keyCode;
-		switch (_p12) {
-			case 38:
-				return A3(_user$project$Main$changeDirection, model, model.snake, _user$project$Main$Up);
-			case 40:
-				return A3(_user$project$Main$changeDirection, model, model.snake, _user$project$Main$Down);
-			case 37:
-				return A3(_user$project$Main$changeDirection, model, model.snake, _user$project$Main$Left);
-			case 39:
-				return A3(_user$project$Main$changeDirection, model, model.snake, _user$project$Main$Right);
-			default:
-				return model;
-		}
+		var model$ = function () {
+			var _p15 = keyCode;
+			switch (_p15) {
+				case 38:
+					return A3(_user$project$Main$changeDirection, model, model.snake, _user$project$Main$Up);
+				case 40:
+					return A3(_user$project$Main$changeDirection, model, model.snake, _user$project$Main$Down);
+				case 37:
+					return A3(_user$project$Main$changeDirection, model, model.snake, _user$project$Main$Left);
+				case 39:
+					return A3(_user$project$Main$changeDirection, model, model.snake, _user$project$Main$Right);
+				default:
+					return model;
+			}
+		}();
+		return A2(
+			_user$project$Main$sendCommand,
+			{
+				snakeId: model$.snake.id,
+				direction: _user$project$Main$directionToInt(model$.snake.direction)
+			},
+			model$);
 	});
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p13 = msg;
-		switch (_p13.ctor) {
+		var _p16 = msg;
+		switch (_p16.ctor) {
 			case 'None':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
@@ -10665,11 +10694,7 @@ var _user$project$Main$update = F2(
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			case 'KeyUp':
-				return A2(
-					_elm_lang$core$Platform_Cmd_ops['!'],
-					A2(_user$project$Main$keyUp, _p13._0, model),
-					_elm_lang$core$Native_List.fromArray(
-						[]));
+				return A2(_user$project$Main$keyUp, _p16._0, model);
 			case 'KeyDown':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
@@ -10681,21 +10706,21 @@ var _user$project$Main$update = F2(
 			case 'OriginRecalculate':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					A2(_user$project$Main$recalculateOrigin, model, _p13._0),
+					A2(_user$project$Main$recalculateOrigin, model, _p16._0),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			case 'NextFood':
 				var a = false;
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
-					A2(_user$project$Main$nextFood, model, _p13._0),
+					A2(_user$project$Main$nextFood, model, _p16._0),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 			case 'JoinChannel':
 				var channel = _fbonetti$elm_phoenix_socket$Phoenix_Channel$init(_user$project$Main$channelName);
-				var _p14 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$join, channel, model.phxSocket);
-				var phxSocket = _p14._0;
-				var phxCmd = _p14._1;
+				var _p17 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$join, channel, model.phxSocket);
+				var phxSocket = _p17._0;
+				var phxCmd = _p17._1;
 				var a = A2(_elm_lang$core$Debug$log, 'joiining channel', channel);
 				return {
 					ctor: '_Tuple2',
@@ -10705,58 +10730,7 @@ var _user$project$Main$update = F2(
 					_1: A2(_elm_lang$core$Platform_Cmd$map, _user$project$Main$PhoenixMsg, phxCmd)
 				};
 			case 'PhoenixMsg':
-				var _p15 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$update, _p13._0, model.phxSocket);
-				var phxSocket = _p15._0;
-				var phxCmd = _p15._1;
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{phxSocket: phxSocket}),
-					_1: A2(_elm_lang$core$Platform_Cmd$map, _user$project$Main$PhoenixMsg, phxCmd)
-				};
-			case 'ReceiveCommand':
-				var _p17 = _p13._0;
-				var _p16 = A2(_elm_lang$core$Json_Decode$decodeValue, _user$project$Main$snakeCommandDecoder, _p17);
-				if (_p16.ctor === 'Ok') {
-					var l = A2(_elm_lang$core$Debug$log, 'changing direction through broadcast', _p17);
-					return A2(
-						_elm_lang$core$Platform_Cmd_ops['!'],
-						A3(
-							_user$project$Main$changeDirection,
-							model,
-							A2(_user$project$Main$getSnake, _p16._0.snakeId, model),
-							_user$project$Main$intToDirection(_p16._0.direction)),
-						_elm_lang$core$Native_List.fromArray(
-							[]));
-				} else {
-					var l = A2(_elm_lang$core$Debug$log, 'error when decoding snake command', _p17);
-					return A2(
-						_elm_lang$core$Platform_Cmd_ops['!'],
-						model,
-						_elm_lang$core$Native_List.fromArray(
-							[]));
-				}
-			default:
-				var payload = _elm_lang$core$Json_Encode$object(
-					_elm_lang$core$Native_List.fromArray(
-						[
-							{
-							ctor: '_Tuple2',
-							_0: 'snakeId',
-							_1: _elm_lang$core$Json_Encode$string(_p13._0.snakeId)
-						},
-							{
-							ctor: '_Tuple2',
-							_0: 'direction',
-							_1: _elm_lang$core$Json_Encode$int(_p13._0.direction)
-						}
-						]));
-				var push$ = A2(
-					_fbonetti$elm_phoenix_socket$Phoenix_Push$withPayload,
-					payload,
-					A2(_fbonetti$elm_phoenix_socket$Phoenix_Push$init, 'new:msg', _user$project$Main$channelName));
-				var _p18 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$push, push$, model.phxSocket);
+				var _p18 = A2(_fbonetti$elm_phoenix_socket$Phoenix_Socket$update, _p16._0, model.phxSocket);
 				var phxSocket = _p18._0;
 				var phxCmd = _p18._1;
 				return {
@@ -10766,6 +10740,28 @@ var _user$project$Main$update = F2(
 						{phxSocket: phxSocket}),
 					_1: A2(_elm_lang$core$Platform_Cmd$map, _user$project$Main$PhoenixMsg, phxCmd)
 				};
+			default:
+				var _p20 = _p16._0;
+				var _p19 = A2(_elm_lang$core$Json_Decode$decodeValue, _user$project$Main$snakeCommandDecoder, _p20);
+				if (_p19.ctor === 'Ok') {
+					var l = A2(_elm_lang$core$Debug$log, 'changing direction through broadcast', _p20);
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						A3(
+							_user$project$Main$changeDirection,
+							model,
+							A2(_user$project$Main$getSnake, _p19._0.snakeId, model),
+							_user$project$Main$intToDirection(_p19._0.direction)),
+						_elm_lang$core$Native_List.fromArray(
+							[]));
+				} else {
+					var l = A2(_elm_lang$core$Debug$log, 'error when decoding snake command', _p20);
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						model,
+						_elm_lang$core$Native_List.fromArray(
+							[]));
+				}
 		}
 	});
 var _user$project$Main$main = {
