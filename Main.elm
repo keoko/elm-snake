@@ -1,8 +1,8 @@
 module Main exposing (..)
 
 import Html.App as App
-import Html exposing (Html, text, div, button)
-import Html.Attributes exposing (id, style)
+import Html exposing (Html, text, div, button, input)
+import Html.Attributes exposing (id, style, type', placeholder)
 import Html.Events exposing (onClick, onInput)
 import Keyboard exposing (KeyCode)
 import AnimationFrame
@@ -31,6 +31,7 @@ channelName = "room:lobby"
 type alias Model =
     { snake : Snake
     , snakes : List Snake
+    , snakeName : String
     , food : Point
     , origin : (Int, Int)
     , maxX : Int
@@ -61,6 +62,8 @@ type Msg = TimeUpdate  Time
       | PhoenixMsg (Phoenix.Socket.Msg Msg)
       | JoinChannel
       | ReceiveCommand Json.Value
+      | SnakeName String
+      | AddSnake
       | None
 
 type Direction = Up | Down | Left | Right
@@ -91,11 +94,12 @@ initialFoodPoint = newPoint 200 0
 model : Model
 model =
     { snake = newSnake "foo" [initialPoint, (newPoint 501 0), (newPoint 502 0)] Left "green"
-    , snakes = [ newSnake "bar" [(newPoint 300 0), (newPoint 301 0), (newPoint 302 0)] Left "blue"
-               , newSnake "baz" [(newPoint 300 20), (newPoint 301 20), (newPoint 302 20)] Right "orange"
-               , newSnake "quux" [(newPoint 300 50), (newPoint 301 50), (newPoint 302 50)] Up "violet"
-               ]
-
+    , snakes = []
+    -- , snakes = [ newSnake "bar" [(newPoint 300 0), (newPoint 301 0), (newPoint 302 0)] Left "blue"
+    --            , newSnake "baz" [(newPoint 300 20), (newPoint 301 20), (newPoint 302 20)] Right "orange"
+    --            , newSnake "quux" [(newPoint 300 50), (newPoint 301 50), (newPoint 302 50)] Up "violet"
+    --            ]
+    , snakeName = ""
     , food = initialFoodPoint
     , origin = (0, 0)
     , maxX = 100
@@ -165,6 +169,13 @@ update msg model =
                         l = Debug.log "error when decoding snake command" raw
                     in
                         model ! []
+        SnakeName snakeName ->
+            { model | snakeName = snakeName } ! []
+        AddSnake ->
+            let
+                snake = newSnake model.snakeName [initialPoint] Left model.snakeName
+            in
+                { model | snakes = snake :: model.snakes } ! []
 
 
 sendCommand : SnakeJsonCommand -> Model -> (Model, Cmd Msg)
@@ -246,6 +257,8 @@ view model =
         [
          text <| (toString model.food) ++ (toString <| head model.snake)
         , button [ onClick JoinChannel ] [ text "Join lobby" ]
+        , input [type' "text", placeholder "Color", onInput SnakeName] []
+        , button [ onClick AddSnake ] [ text "Add Snake" ]
         , div [] (food :: (snake ++ snakes))
         ]
 

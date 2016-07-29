@@ -10355,9 +10355,9 @@ var _user$project$Main$viewFood = function (p) {
 var _user$project$Main$channelName = 'room:lobby';
 var _user$project$Main$socketServer = 'ws://localhost:4000/socket/websocket';
 var _user$project$Main$host = 'http://localhost:4000';
-var _user$project$Main$Model = F8(
-	function (a, b, c, d, e, f, g, h) {
-		return {snake: a, snakes: b, food: c, origin: d, maxX: e, maxY: f, seed: g, phxSocket: h};
+var _user$project$Main$Model = F9(
+	function (a, b, c, d, e, f, g, h, i) {
+		return {snake: a, snakes: b, snakeName: c, food: d, origin: e, maxX: f, maxY: g, seed: h, phxSocket: i};
 	});
 var _user$project$Main$SnakeJsonCommand = F2(
 	function (a, b) {
@@ -10377,6 +10377,10 @@ var _user$project$Main$Point = F2(
 		return {x: a, y: b};
 	});
 var _user$project$Main$None = {ctor: 'None'};
+var _user$project$Main$AddSnake = {ctor: 'AddSnake'};
+var _user$project$Main$SnakeName = function (a) {
+	return {ctor: 'SnakeName', _0: a};
+};
 var _user$project$Main$ReceiveCommand = function (a) {
 	return {ctor: 'ReceiveCommand', _0: a};
 };
@@ -10417,6 +10421,26 @@ var _user$project$Main$view = function (model) {
 				_elm_lang$core$Native_List.fromArray(
 					[
 						_elm_lang$html$Html$text('Join lobby')
+					])),
+				A2(
+				_elm_lang$html$Html$input,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Attributes$type$('text'),
+						_elm_lang$html$Html_Attributes$placeholder('Color'),
+						_elm_lang$html$Html_Events$onInput(_user$project$Main$SnakeName)
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[])),
+				A2(
+				_elm_lang$html$Html$button,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Events$onClick(_user$project$Main$AddSnake)
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text('Add Snake')
 					])),
 				A2(
 				_elm_lang$html$Html$div,
@@ -10568,8 +10592,6 @@ var _user$project$Main$subscriptions = function (model) {
 };
 var _user$project$Main$Right = {ctor: 'Right'};
 var _user$project$Main$Left = {ctor: 'Left'};
-var _user$project$Main$Down = {ctor: 'Down'};
-var _user$project$Main$Up = {ctor: 'Up'};
 var _user$project$Main$model = {
 	snake: A4(
 		_user$project$Main$newSnake,
@@ -10583,41 +10605,8 @@ var _user$project$Main$model = {
 		_user$project$Main$Left,
 		'green'),
 	snakes: _elm_lang$core$Native_List.fromArray(
-		[
-			A4(
-			_user$project$Main$newSnake,
-			'bar',
-			_elm_lang$core$Native_List.fromArray(
-				[
-					A2(_user$project$Main$newPoint, 300, 0),
-					A2(_user$project$Main$newPoint, 301, 0),
-					A2(_user$project$Main$newPoint, 302, 0)
-				]),
-			_user$project$Main$Left,
-			'blue'),
-			A4(
-			_user$project$Main$newSnake,
-			'baz',
-			_elm_lang$core$Native_List.fromArray(
-				[
-					A2(_user$project$Main$newPoint, 300, 20),
-					A2(_user$project$Main$newPoint, 301, 20),
-					A2(_user$project$Main$newPoint, 302, 20)
-				]),
-			_user$project$Main$Right,
-			'orange'),
-			A4(
-			_user$project$Main$newSnake,
-			'quux',
-			_elm_lang$core$Native_List.fromArray(
-				[
-					A2(_user$project$Main$newPoint, 300, 50),
-					A2(_user$project$Main$newPoint, 301, 50),
-					A2(_user$project$Main$newPoint, 302, 50)
-				]),
-			_user$project$Main$Up,
-			'violet')
-		]),
+		[]),
+	snakeName: '',
 	food: _user$project$Main$initialFoodPoint,
 	origin: {ctor: '_Tuple2', _0: 0, _1: 0},
 	maxX: 100,
@@ -10626,6 +10615,8 @@ var _user$project$Main$model = {
 	phxSocket: _user$project$Main$initPhxSocket
 };
 var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Main$model, _1: _user$project$Main$initialOrigin};
+var _user$project$Main$Down = {ctor: 'Down'};
+var _user$project$Main$Up = {ctor: 'Up'};
 var _user$project$Main$intToDirection = function (x) {
 	return _elm_lang$core$Native_Utils.eq(x, 0) ? _user$project$Main$Up : (_elm_lang$core$Native_Utils.eq(x, 1) ? _user$project$Main$Down : (_elm_lang$core$Native_Utils.eq(x, 2) ? _user$project$Main$Right : _user$project$Main$Left));
 };
@@ -10740,7 +10731,7 @@ var _user$project$Main$update = F2(
 						{phxSocket: phxSocket}),
 					_1: A2(_elm_lang$core$Platform_Cmd$map, _user$project$Main$PhoenixMsg, phxCmd)
 				};
-			default:
+			case 'ReceiveCommand':
 				var _p20 = _p16._0;
 				var _p19 = A2(_elm_lang$core$Json_Decode$decodeValue, _user$project$Main$snakeCommandDecoder, _p20);
 				if (_p19.ctor === 'Ok') {
@@ -10762,6 +10753,31 @@ var _user$project$Main$update = F2(
 						_elm_lang$core$Native_List.fromArray(
 							[]));
 				}
+			case 'SnakeName':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{snakeName: _p16._0}),
+					_elm_lang$core$Native_List.fromArray(
+						[]));
+			default:
+				var snake = A4(
+					_user$project$Main$newSnake,
+					model.snakeName,
+					_elm_lang$core$Native_List.fromArray(
+						[_user$project$Main$initialPoint]),
+					_user$project$Main$Left,
+					model.snakeName);
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							snakes: A2(_elm_lang$core$List_ops['::'], snake, model.snakes)
+						}),
+					_elm_lang$core$Native_List.fromArray(
+						[]));
 		}
 	});
 var _user$project$Main$main = {
