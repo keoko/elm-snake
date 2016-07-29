@@ -93,7 +93,8 @@ initialFoodPoint = newPoint 200 0
 
 model : Model
 model =
-    { snake = newSnake "foo" [initialPoint, (newPoint 501 0), (newPoint 502 0)] Left "green"
+    { snake = newSnake "" [] Left ""
+    --snake = newSnake "foo" [initialPoint, (newPoint 501 0), (newPoint 502 0)] Left "green"
     , snakes = []
     -- , snakes = [ newSnake "bar" [(newPoint 300 0), (newPoint 301 0), (newPoint 302 0)] Left "blue"
     --            , newSnake "baz" [(newPoint 300 20), (newPoint 301 20), (newPoint 302 20)] Right "orange"
@@ -175,7 +176,7 @@ update msg model =
             let
                 snake = newSnake model.snakeName [initialPoint] Left model.snakeName
             in
-                { model | snakes = snake :: model.snakes } ! []
+                { model | snake = snake } ! []
 
 
 sendCommand : SnakeJsonCommand -> Model -> (Model, Cmd Msg)

@@ -10595,15 +10595,11 @@ var _user$project$Main$Left = {ctor: 'Left'};
 var _user$project$Main$model = {
 	snake: A4(
 		_user$project$Main$newSnake,
-		'foo',
+		'',
 		_elm_lang$core$Native_List.fromArray(
-			[
-				_user$project$Main$initialPoint,
-				A2(_user$project$Main$newPoint, 501, 0),
-				A2(_user$project$Main$newPoint, 502, 0)
-			]),
+			[]),
 		_user$project$Main$Left,
-		'green'),
+		''),
 	snakes: _elm_lang$core$Native_List.fromArray(
 		[]),
 	snakeName: '',
@@ -10773,9 +10769,7 @@ var _user$project$Main$update = F2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
 						model,
-						{
-							snakes: A2(_elm_lang$core$List_ops['::'], snake, model.snakes)
-						}),
+						{snake: snake}),
 					_elm_lang$core$Native_List.fromArray(
 						[]));
 		}
