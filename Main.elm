@@ -61,7 +61,8 @@ type Msg = TimeUpdate  Time
       | NextFood Point
       | PhoenixMsg (Phoenix.Socket.Msg Msg)
       | JoinChannel
-      | ReceiveCommand Json.Value
+      | ReceiveSnakeMove Json.Value
+      | ReceiveSnakeAdd Json.Value
       | SnakeName String
       | AddSnake
       | None
@@ -158,7 +159,7 @@ update msg model =
                 ( { model | phxSocket = phxSocket }
                 , Cmd.map PhoenixMsg phxCmd
                 )
-        ReceiveCommand raw ->
+        ReceiveSnakeMove raw ->
             case decodeValue snakeCommandDecoder raw of
                 Ok {direction, snakeId} ->
                     let
@@ -167,26 +168,41 @@ update msg model =
                         (changeDirection model (getSnake snakeId model) <| intToDirection direction) ! []
                 _ ->
                     let
-                        l = Debug.log "error when decoding snake command" raw
+                        l = Debug.log "error when decoding snake move command" raw
+                    in
+                        model ! []
+        ReceiveSnakeAdd raw ->
+            case decodeValue snakeCommandDecoder raw of
+                Ok {direction, snakeId} ->
+                    let
+                        l = Debug.log "changing direction through broadcast" raw
+                        snake = newDefaultSnake snakeId <| intToDirection direction
+                    in
+                        addSnake snake model ! []
+                _ ->
+                    let
+                        l = Debug.log "error when decoding snake add command" raw
                     in
                         model ! []
         SnakeName snakeName ->
             { model | snakeName = snakeName } ! []
         AddSnake ->
             let
-                snake = newSnake model.snakeName [initialPoint] Left model.snakeName
+                l = Debug.log "snakeId" model.snakeName
+                snake = newDefaultSnake model.snakeName Left
+                model' = { model | snake = snake }
+                command = { snakeId = model.snakeName
+                          , direction = directionToInt model'.snake.direction
+                          }
             in
-                { model | snake = snake } ! []
+                sendSnakeAddCommand command model'
 
 
-sendCommand : SnakeJsonCommand -> Model -> (Model, Cmd Msg)
-sendCommand {snakeId, direction} model =
+sendCommand : String -> Json.Value -> Model -> (Model, Cmd Msg)
+sendCommand commandName payload model =
     let
-        payload =
-            (Json.object [ ( "snakeId", Json.string snakeId )
-                         , ( "direction", Json.int direction) ])
         push' =
-            Phoenix.Push.init "new:msg" channelName
+            Phoenix.Push.init commandName channelName
                 |> Phoenix.Push.withPayload payload
         ( phxSocket, phxCmd ) =
             Phoenix.Socket.push push' model.phxSocket
@@ -194,6 +210,24 @@ sendCommand {snakeId, direction} model =
         ( { model | phxSocket = phxSocket }
         , Cmd.map PhoenixMsg phxCmd
         )
+
+sendSnakeMoveCommand : SnakeJsonCommand -> Model -> (Model, Cmd Msg)
+sendSnakeMoveCommand {snakeId, direction} model =
+    let
+        payload =
+            (Json.object [ ( "snakeid", Json.string snakeId )
+                         , ( "direction", Json.int direction) ])
+    in
+        sendCommand "snake:move" payload model
+
+sendSnakeAddCommand : SnakeJsonCommand -> Model -> (Model, Cmd Msg)
+sendSnakeAddCommand {snakeId, direction} model =
+    let
+        payload =
+            (Json.object [ ( "snakeid", Json.string snakeId )
+                         , ( "direction", Json.int direction) ])
+    in
+        sendCommand "snake:add" payload model
 
 recalculateOrigin : Model -> Window.Size -> Model
 recalculateOrigin model size =
@@ -448,11 +482,13 @@ keyUp keyCode model =
                     changeDirection model model.snake Right
                 _ ->
                     model
+
+        command = { snakeId = model'.snake.id
+                  , direction = directionToInt model'.snake.direction
+                  }
+
     in
-        sendCommand { snakeId = model'.snake.id
-                    , direction = directionToInt model'.snake.direction
-                    }
-                    model'
+        sendSnakeMoveCommand command model'
 
 
 keyDown : KeyCode -> Model -> Snake -> Model
@@ -483,6 +519,10 @@ newSnake id body direction color =
     , color = color
     }
 
+newDefaultSnake : SnakeId -> Direction -> Snake
+newDefaultSnake snakeId direction =
+    newSnake snakeId [initialPoint] direction snakeId
+
 updateSnake : Model -> Snake -> Model
 updateSnake model snake =
     if snake.id == model.snake.id then
@@ -505,7 +545,8 @@ initPhxSocket : Phoenix.Socket.Socket Msg
 initPhxSocket =
     Phoenix.Socket.init socketServer
         |> Phoenix.Socket.withDebug
-        |> Phoenix.Socket.on "snake:command" channelName ReceiveCommand
+        |> Phoenix.Socket.on "snake:move" channelName ReceiveSnakeMove
+        |> Phoenix.Socket.on "snake:add" channelName ReceiveSnakeAdd
 
 mayChangeDirection : Snake -> Model -> Model
 mayChangeDirection snake model =
@@ -525,3 +566,11 @@ snakeCommandDecoder =
      object2 SnakeJsonCommand
          ("direction" := int)
          ("snakeId" := string)
+
+
+addSnake : Snake -> Model -> Model
+addSnake snake model =
+    if model.snake.id == snake.id then
+        model
+    else
+        { model | snakes = snake :: model.snakes }
